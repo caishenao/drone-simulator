@@ -236,6 +236,8 @@ const MIME = {
 if (STATIC_DIR) {
   const root = path.resolve(STATIC_DIR)
   httpServer.on('request', (req, res) => {
+    // socket.io 的轮询请求有自己的处理器：这里再写一次头会 ERR_HTTP_HEADERS_SENT 崩溃循环
+    if (req.url?.startsWith('/socket.io')) return
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       res.writeHead(405).end()
       return
