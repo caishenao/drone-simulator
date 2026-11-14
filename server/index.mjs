@@ -7,7 +7,11 @@
 //   · 玩家名称全局唯一（大小写不敏感），重名直接拒绝；
 //   · 连接即在场：断开连接（含关闭浏览器页面）立即从空域移除，无持久化。
 //
-// 启动：node server/index.mjs（MP_HOST / MP_PORT / MP_ORIGINS / MP_ORIGIN_LON / MP_ORIGIN_LAT / MP_ORIGIN_NAME 可覆盖）。
+// 部署：设 MP_STATIC_DIR 指向前端构建产物（web/dist）后，页面、Cesium 资源与
+// Socket.IO 走同一端口（同源直连）；不设则纯中继（配合 vite dev 使用）。
+//
+// 启动：node server/index.mjs
+//   （MP_HOST / MP_PORT / MP_ORIGINS / MP_STATIC_DIR / MP_ORIGIN_LON / MP_ORIGIN_LAT / MP_ORIGIN_NAME 可覆盖）
 import { Server } from 'socket.io'
 import http from 'node:http'
 import fs from 'node:fs'
@@ -21,6 +25,13 @@ const ORIGINS = (process.env.MP_ORIGINS || 'http://127.0.0.1:5188,http://localho
   .map((s) => s.trim())
   .filter(Boolean)
 
+// 空域起飞原点：全服唯一，所有人进入后自动搬到这一点上，共享同一套本地 ENU 坐标。
+const WORLD_ORIGIN = {
+  lon: Number(process.env.MP_ORIGIN_LON) || 116.4602,
+  lat: Number(process.env.MP_ORIGIN_LAT) || 39.9026,
+  placeName: process.env.MP_ORIGIN_NAME || '北京国贸',
+}
+
 // 空域上限：Cesium 多 Model 渲染与带宽都在这个量级内可控（见方案第 10 节）。
 const MAX_PLAYERS = 16
 // mp:state 静默超时：Socket.IO 心跳本身能探活断线，这里再兜一层「连接还在但客户端卡死」。
@@ -28,16 +39,6 @@ const STATE_TIMEOUT_MS = 15_000
 // 清理间隔与聊天限频。
 const SWEEP_INTERVAL_MS = 5_000
 const CHAT_RATE_PER_SEC = 3
-
-/**
- * 空域起飞原点：全服唯一，所有人进入后自动搬到这一点上，共享同一套本地 ENU 坐标。
- * 默认北京国贸（与 web 端 DEFAULT_PLACE 一致）；MP_ORIGIN_LON / MP_ORIGIN_LAT / MP_ORIGIN_NAME 可覆盖。
- */
-const WORLD_ORIGIN = {
-  lon: Number(process.env.MP_ORIGIN_LON) || 116.4602,
-  lat: Number(process.env.MP_ORIGIN_LAT) || 39.9026,
-  placeName: process.env.MP_ORIGIN_NAME || '北京国贸',
-}
 
 /** 16 色调色板：按加入顺序分配，撞色由服务器统一管，不留给客户端随机。 */
 const PALETTE = [
@@ -59,6 +60,94 @@ const PALETTE = [
   '#ff9fc9',
 ]
 
+// —— 同源静态托管（Docker 单端口部署）——
+// MP_STATIC_DIR 指向前端构建产物：页面、Cesium UMD、机体 GLB 与 Socket.IO 同端口同源。
+const STATIC_DIR = process.env.MP_STATIC_DIR || ''
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.map': 'application/json',
+  '.glb': 'model/gltf-binary',
+  '.gltf': 'model/gltf+json',
+  '.bin': 'application/octet-stream',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.wasm': 'application/wasm',
+  '.woff2': 'font/woff2',
+  '.geojson': 'application/geo+json',
+  '.ktx2': 'image/ktx2',
+}
+
+/** 静态文件服务：路径规范化限死在产物目录内，未命中回 index.html（SPA 兜底） */
+function serveStatic(req, res) {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.writeHead(405).end()
+    return
+  }
+  let urlPath = decodeURIComponent((req.url ?? '/').split('?')[0])
+  if (urlPath.endsWith('/')) urlPath += 'index.html'
+  const file = path.resolve(STATIC_DIR, '.' + urlPath)
+  if (file !== path.resolve(STATIC_DIR) && !file.startsWith(path.resolve(STATIC_DIR) + path.sep)) {
+    res.writeHead(403).end()
+    return
+  }
+  fs.stat(file, (err, st) => {
+    if (res.headersSent || res.writableEnded) return
+    if (err || !st.isFile()) {
+      const index = path.join(STATIC_DIR, 'index.html')
+      fs.readFile(index, (e2, buf) => {
+        if (res.headersSent || res.writableEnded) return
+        if (e2) {
+          res.writeHead(404).end()
+          return
+        }
+        res.writeHead(200, { 'content-type': MIME['.html'], 'cache-control': 'no-cache' })
+        res.end(req.method === 'HEAD' ? undefined : buf)
+      })
+      return
+    }
+    const type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream'
+    // 带内容指纹的资产长缓存；index.html 不缓存（发版即时生效）
+    const immutable = /-[A-Za-z0-9_-]{8,}\.[a-z]+$/.test(file)
+    res.writeHead(200, {
+      'content-type': type,
+      'content-length': st.size,
+      'cache-control': immutable ? 'public, max-age=31536000, immutable' : 'no-cache',
+    })
+    if (req.method === 'HEAD') {
+      res.end()
+      return
+    }
+    fs.createReadStream(file).pipe(res)
+  })
+}
+
+/**
+ * HTTP 请求入口（必须先于 new Server() 注册）：
+ * socket.io attach 时会捕获既有监听器并在其分发器里回调——非 socket.io 请求
+ * 由这里应答且只应答一次；在 attach 之后另加监听器会造成双重写头崩溃。
+ */
+const httpServer = http.createServer((req, res) => {
+  // 健康检查。静态模式下 / 让给前端页面，健康端点固定为 /healthz
+  const health =
+    req.url === '/healthz' || (req.url === '/' && !STATIC_DIR)
+  if (health) {
+    res.writeHead(200, { 'content-type': 'application/json' })
+    res.end(JSON.stringify({ ok: true, players: totalPlayers(), origin: WORLD_ORIGIN }))
+    return
+  }
+  if (STATIC_DIR) {
+    serveStatic(req, res)
+    return
+  }
+  res.writeHead(404).end()
+})
+
 /**
  * @typedef {Object} Player
  * @property {string} id socket.id
@@ -72,17 +161,16 @@ const PALETTE = [
 /** @type {Map<string, Player>} socket.id → player */
 const players = new Map()
 
-const httpServer = http.createServer((_req, res) => {
-  // 健康检查：dev 环境里用来确认服务器起来了
-  res.writeHead(200, { 'content-type': 'application/json' })
-  res.end(JSON.stringify({ ok: true, players: players.size, origin: WORLD_ORIGIN }))
-})
 const io = new Server(httpServer, {
   cors: { origin: ORIGINS },
   // 模拟器场景 tolerate 弱网：放宽心跳探测
   pingInterval: 10_000,
   pingTimeout: 20_000,
 })
+
+function totalPlayers() {
+  return players.size
+}
 
 function sanitizeName(raw) {
   const name = String(raw ?? '').replace(/\s+/g, ' ').trim().slice(0, 16)
@@ -148,8 +236,7 @@ io.on('connection', (socket) => {
     socket.join('world')
     joined = true
 
-    // 加入确认：self + 空域原点 + 全量名单；客户端据此搬场景、建远端机体。
-    // 先发事件再回 ack：两包可能分批到达，客户端逻辑不能依赖「ack 后事件已处理」
+    // 加入确认：先发事件再回 ack，两包可能分批到达，客户端不能依赖顺序
     socket.emit('mp:joined', { self: publicPlayer(player), origin: WORLD_ORIGIN, players: roster() })
     if (typeof ack === 'function') ack({ ok: true, self: publicPlayer(player), origin: WORLD_ORIGIN, players: roster() })
     socket.to('world').emit('mp:player-joined', { player: publicPlayer(player) })
@@ -209,82 +296,10 @@ setInterval(() => {
   }
 }, SWEEP_INTERVAL_MS)
 
-// —— 同源静态托管（Docker 单端口部署）——
-// MP_STATIC_DIR 指向前端构建产物（web/dist）：页面、Cesium UMD、机体 GLB 与
-// Socket.IO 走同一个端口，浏览器同源直连，无需再配 CORS 与独立 MP 地址。
-// 不设 MP_STATIC_DIR 时行为与原来完全一致（纯中继，配合 vite dev 使用）。
-const STATIC_DIR = process.env.MP_STATIC_DIR || ''
-const MIME = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.mjs': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.map': 'application/json',
-  '.glb': 'model/gltf-binary',
-  '.gltf': 'model/gltf+json',
-  '.bin': 'application/octet-stream',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon',
-  '.wasm': 'application/wasm',
-  '.woff2': 'font/woff2',
-  '.geojson': 'application/geo+json',
-  '.ktx2': 'image/ktx2',
-}
-if (STATIC_DIR) {
-  const root = path.resolve(STATIC_DIR)
-  httpServer.on('request', (req, res) => {
-    // socket.io 的轮询请求有自己的处理器：这里再写一次头会 ERR_HTTP_HEADERS_SENT 崩溃循环
-    if (req.url?.startsWith('/socket.io')) return
-    if (req.method !== 'GET' && req.method !== 'HEAD') {
-      res.writeHead(405).end()
-      return
-    }
-    // URL 解码后规范化并限死在产物目录内：防路径穿越
-    let urlPath = decodeURIComponent((req.url ?? '/').split('?')[0])
-    if (urlPath.endsWith('/')) urlPath += 'index.html'
-    const file = path.resolve(root, '.' + urlPath)
-    if (file !== root && !file.startsWith(root + path.sep)) {
-      res.writeHead(403).end()
-      return
-    }
-    fs.stat(file, (err, st) => {
-      if (err || !st.isFile()) {
-        // SPA 兜底：hash 路由其实用不到，保底给 index.html 而不是 404
-        const index = path.join(root, 'index.html')
-        fs.readFile(index, (e2, buf) => {
-          if (e2) {
-            res.writeHead(404).end()
-            return
-          }
-          res.writeHead(200, { 'content-type': MIME['.html'], 'cache-control': 'no-cache' })
-          res.end(req.method === 'HEAD' ? undefined : buf)
-        })
-        return
-      }
-      const type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream'
-      // 带内容指纹的资产长缓存；index.html 不缓存（发版即时生效）
-      const immutable = /-[A-Za-z0-9_-]{8,}\.[a-z]+$/.test(file)
-      res.writeHead(200, {
-        'content-type': type,
-        'content-length': st.size,
-        'cache-control': immutable ? 'public, max-age=31536000, immutable' : 'no-cache',
-      })
-      if (req.method === 'HEAD') {
-        res.end()
-        return
-      }
-      fs.createReadStream(file).pipe(res)
-    })
-  })
-  console.log(`[mp] 同源静态托管已开启: ${root}`)
-}
-
 httpServer.listen(PORT, HOST, () => {
+  const staticNote = STATIC_DIR ? `，同源静态托管 ${STATIC_DIR}` : ''
   console.log(
-    `[mp] 全球空域服务器已启动: http://${HOST}:${PORT}（起飞点 ${WORLD_ORIGIN.placeName} ` +
-      `${WORLD_ORIGIN.lat}, ${WORLD_ORIGIN.lon}；CORS 放行 ${ORIGINS.join(', ')}）`,
+    `[mp] 全球空域服务器已启动: http://${HOST}:${PORT}${staticNote}` +
+      `（起飞点 ${WORLD_ORIGIN.placeName} ${WORLD_ORIGIN.lat}, ${WORLD_ORIGIN.lon}；CORS 放行 ${ORIGINS.join(', ')}）`,
   )
 })
