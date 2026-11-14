@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>四旋翼无人机 · 六自由度刚体物理演示</title>
+<link rel="icon" href="data:,">
+<style>
+  :root{--bg:#111720;--panel:#171f2c;--line:#28364a;--fg:#e3ecf6;--dim:#8ea0b6;--acc:#4aa8ff;--ok:#49d6a0;--warn:#ff8a6b}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);overflow:hidden;
+    font:12.5px/1.55 "Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+  #app{display:flex;height:100%}
+  #panel{width:320px;flex:0 0 320px;background:var(--panel);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;overflow:hidden}
+  h1{margin:0;padding:14px 16px 11px;font-size:14px;border-bottom:1px solid var(--line)}
+  h1 small{display:block;margin-top:3px;color:var(--dim);font-weight:400;font-size:11px}
+  #scroll{flex:1;overflow:auto}
+  .sec{padding:10px 16px;border-bottom:1px solid var(--line)}
+  .sec h2{margin:0 0 8px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim)}
+  .row{display:flex;align-items:center;gap:8px;margin:6px 0}
+  .row label{flex:0 0 76px;color:var(--dim)}
+  input[type=range]{flex:1;accent-color:var(--acc);height:4px}
+  .val{flex:0 0 62px;text-align:right;font-variant-numeric:tabular-nums;color:var(--acc)}
+  .kv{display:flex;justify-content:space-between;padding:1px 0;font-variant-numeric:tabular-nums}
+  .kv b{font-weight:600;color:#fff}
+  .btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  button{background:#1d2837;color:var(--fg);border:1px solid var(--line);border-radius:6px;
+    padding:5px 9px;font-size:11px;cursor:pointer;font-family:inherit}
+  button:hover{border-color:#42658f}
+  button.on{background:#173c5e;border-color:var(--acc);color:#d4e9ff}
+  .keys{color:var(--dim);font-size:11px;line-height:1.9}
+  kbd{background:#202c3d;border:1px solid #34465f;border-radius:4px;padding:1px 5px;
+    color:#cfe0f5;font:10.5px Consolas,monospace}
+  #stage{flex:1;position:relative;min-width:0}
+  canvas{display:block;width:100%;height:100%}
+  #hud{position:absolute;right:14px;top:14px;background:rgba(10,16,26,.78);
+    border:1px solid rgba(120,150,190,.3);border-radius:8px;padding:9px 12px;
+    font:11.5px/1.6 Consolas,monospace;color:#cfe0f5;white-space:pre;pointer-events:none}
+  #load{position:absolute;inset:0;display:grid;place-items:center;background:var(--bg);color:var(--dim)}
+  .ok{color:var(--ok)}.warn{color:var(--warn)}
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"../../vendor/three/build/three.module.js",
+  "three/addons/":"../../vendor/three/examples/jsm/",
+  "drone-physics":"../../physics/drone_physics.js"
+}}
+</script>
+</head>
+<body>
+<div id="app">
+ <div id="panel">
+  <h1>六自由度刚体物理
+    <small>0.249 kg · 惯量张量 · 四旋翼推力/力矩 · 地面接触</small>
+  </h1>
+  <div id="scroll">
+   <div class="sec">
+    <h2>实时遥测</h2>
+    <div class="kv"><span>位置 x/y/z</span><b id="t-pos">—</b></div>
+    <div class="kv"><span>速度 / 速率</span><b id="t-vel">—</b></div>
+    <div class="kv"><span>姿态 P/R/Y</span><b id="t-att">—</b></div>
+    <div class="kv"><span>角速度 ω</span><b id="t-omg">—</b></div>
+    <div class="kv"><span>总推力</span><b id="t-thr">—</b></div>
+    <div class="kv"><span>四桨 RPM</span><b id="t-rpm">—</b></div>
+    <div class="kv"><span>动能 / 势能</span><b id="t-eng">—</b></div>
+    <div class="kv"><span>地面接触</span><b id="t-con">—</b></div>
+    <div class="kv"><span>镜头</span><b id="t-cam">—</b></div>
+   </div>
+   <div class="sec">
+    <h2>控制</h2>
+    <div class="row"><label>油门</label><input id="thr" type="range" min="0" max="100" value="45.5"><span class="val" id="v-thr">45.5%</span></div>
+    <div class="btns">
+      <button id="b-stab" class="on">姿态自稳</button>
+      <button id="b-wind">侧风 0.15 N</button>
+      <button id="b-gust">阵风冲击</button>
+      <button id="b-hit">偏心撞击</button>
+      <button id="b-drop">切断动力</button>
+      <button id="b-follow" class="on">跟随：固定方位</button>
+      <button id="b-snap">镜头归位</button>
+      <button id="b-reset">复位</button>
+    </div>
+   </div>
+   <div class="sec">
+    <h2>键盘</h2>
+    <div class="keys">
+      <kbd>W</kbd><kbd>S</kbd> 前倾 / 后倾　<kbd>A</kbd><kbd>D</kbd> 左倾 / 右倾<br>
+      <kbd>Q</kbd><kbd>E</kbd> 左转 / 右转　<kbd>空格</kbd><kbd>Shift</kbd> 油门 ±<br>
+      <kbd>G</kbd> 阵风　<kbd>I</kbd> 撞击　<kbd>R</kbd> 复位　<kbd>↑</kbd><kbd>↓</kbd> 云台<br>
+      <kbd>C</kbd> 切换镜头（固定方位 / 追尾 / 自由）　<kbd>V</kbd> 镜头归位<br>
+      跟随时拖拽调方位、滚轮调距离
+    </div>
+   </div>
+   <div class="sec">
+    <h2>物理模型</h2>
+    <div class="keys">
+      推力沿机体 +Y；力矩 <code>τ = r × F</code> 由 4 个电机力臂算出；<br>
+      <code>I·dω/dt = τ − ω×(Iω) − b·ω</code>（含陀螺耦合）；<br>
+      四元数积分姿态；重力 / 风 / 线性阻力；<br>
+      落地按恢复系数 0.25 反弹 + 摩擦 0.55；<br>
+      电机推力饱和会真实限制机动能力。<br>
+      固定步长 1/240 s，最多 12 子步。
+    </div>
+   </div>
+  </div>
+ </div>
+ <div id="stage">
+  <canvas id="cv"></canvas>
+  <div id="hud">初始化…</div>
+  <div id="load">正在加载 GLB 与物理模块…</div>
+ </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { DroneRigidBody, PHYSICS } from 'drone-physics';
+import { FollowCamera } from '../../follow_camera.js';
+import { createSkyGround } from '../../sky_ground.js';
+
+const $ = id => document.getElementById(id);
+const cv = $('cv'), stage = $('stage');
+const renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.NeutralToneMapping ?? THREE.ACESFilmicToneMapping;
+
+const scene = new THREE.Scene();
+// 天空渐变 + 不透明实体地面（与天空明确区分），地面/网格位于物理地面之下防穿模
+const skyGround = createSkyGround(scene, { scale: 1, gridSize: 2, divisions: 20 });
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.05).texture;
+scene.add(new THREE.HemisphereLight(0xd7e8ff,0x394150,1.0));
+const sun = new THREE.DirectionalLight(0xffffff,2.2);
+sun.position.set(0.6,1.2,0.5); sun.castShadow = true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-2; sun.shadow.camera.right=2;
+sun.shadow.camera.top=2; sun.shadow.camera.bottom=-2;
+sun.shadow.camera.near=0.05; sun.shadow.camera.far=6;
+scene.add(sun);
+// 地面与网格由 sky_ground.js 统一创建
+
+const camera = new THREE.PerspectiveCamera(40,1,0.005,50);
+camera.position.set(0.55,0.42,0.72);
+const controls = new OrbitControls(camera,renderer.domElement);
+controls.target.set(0,0.35,0); controls.enableDamping=true; controls.minDistance=0.2;
+// 米制场景，offset 直接用米
+const follow = new FollowCamera(camera,controls,renderer.domElement,{
+  mode:'world', offset:[0.55,0.12,0.72], distance:1,
+  minDistance:0.3, maxDistance:4, posLambda:10, targetLambda:18,
+});
+const HOME_POS = new THREE.Vector3(0,0.35,0);
+follow.snap(HOME_POS,null);
+window.__droneView = {
+  follow, scale: 1,
+  state: () => follow.state(model ? model.position : HOME_POS),
+};
+
+const body = new DroneRigidBody();
+window.__dronePhysics = body;   // 供端到端穿模自检读取 groundClearance()
+const keys=Object.create(null);
+let model=null, rotors=[], gimbal=null, gimbalDeg=-12, visAngle=0, windOn=false;
+const SPIN=PHYSICS.rotor.spin;
+
+addEventListener('keydown',e=>{
+  keys[e.code]=true;
+  if(['Space','ArrowUp','ArrowDown'].includes(e.code)) e.preventDefault();
+  if(e.code==='KeyG') gust();
+  if(e.code==='KeyI') hit();
+  if(e.code==='KeyR') reset();
+  if(e.code==='KeyC') $('b-follow').click();
+  if(e.code==='KeyV') $('b-snap').click();
+});
+addEventListener('keyup',e=>keys[e.code]=false);
+addEventListener('resize',()=>{
+  const w=stage.clientWidth,h=stage.clientHeight;
+  renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+});
+
+$('thr').oninput=e=>{ body.setControls({throttle:+e.target.value/100}); $('v-thr').textContent=e.target.value+'%'; };
+$('b-stab').onclick=e=>{ body.setStabilize(!body.stabilize); e.target.classList.toggle('on',body.stabilize); };
+$('b-wind').onclick=e=>{ windOn=!windOn; body.setWind(windOn?[0.15,0,0.04]:[0,0,0]); e.target.classList.toggle('on',windOn); };
+$('b-gust').onclick=()=>gust();
+$('b-hit').onclick=()=>hit();
+$('b-drop').onclick=()=>{ body.setControls({throttle:0}); $('thr').value=0; $('v-thr').textContent='0%'; };
+$('b-reset').onclick=()=>reset();
+const FOLLOW_LABEL={world:'跟随：固定方位',body:'跟随：追尾',off:'自由视角'};
+$('b-follow').onclick=e=>{
+  const m=follow.cycleMode();
+  e.target.textContent=FOLLOW_LABEL[m];
+  e.target.classList.toggle('on',m!=='off');
+};
+$('b-snap').onclick=()=>follow.snap(model?model.position:HOME_POS,
+                                   model?model.quaternion:null);
+
+function gust(){ body.setWind([ (Math.random()-0.5)*0.9, 0, (Math.random()-0.5)*0.9 ]);
+  setTimeout(()=>body.setWind(windOn?[0.15,0,0.04]:[0,0,0]), 450); }
+function hit(){ body.applyImpulse([0.010,0.002,-0.006], [0.02,0.035,0]); }
+function reset(){ body.reset(); body.setStabilize($('b-stab').classList.contains('on'));
+  body.setWind(windOn?[0.15,0,0.04]:[0,0,0]);
+  $('thr').value=45.5; $('v-thr').textContent='45.5%';
+  follow.snap(HOME_POS,null); }
+
+new GLTFLoader().load('../../drone_mini3pro.glb',gltf=>{
+  model=gltf.scene; scene.add(model);
+  model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+  rotors=PHYSICS.rotor.order.map(t=>model.getObjectByName('Rotor_'+t));
+  gimbal=model.getObjectByName('Gimbal_Pivot');
+  $('load').style.display='none';
+},undefined,e=>{ $('load').textContent='加载失败: '+e+'（请走 HTTP 服务）'; });
+
+const clock=new THREE.Clock();
+let uiT=0;
+function tick(){
+  requestAnimationFrame(tick);
+  const dt=Math.min(clock.getDelta(),0.05);
+
+  // 键盘 → 控制指令（−1..1）
+  let pitch=0,roll=0,yaw=0;
+  if(keys.KeyW) pitch-=1; if(keys.KeyS) pitch+=1;
+  if(keys.KeyA) roll-=1;  if(keys.KeyD) roll+=1;
+  if(keys.KeyQ) yaw-=1;   if(keys.KeyE) yaw+=1;
+  body.setControls({pitch,roll,yaw});
+  if(keys.Space||keys.ShiftLeft){
+    const t=Math.min(1,Math.max(0,body.controls.throttle+(keys.Space?1:-1)*dt*0.35));
+    body.setControls({throttle:t}); $('thr').value=(t*100).toFixed(1); $('v-thr').textContent=(t*100).toFixed(1)+'%';
+  }
+  if(keys.ArrowUp) gimbalDeg=Math.min(30,gimbalDeg+45*dt);
+  if(keys.ArrowDown) gimbalDeg=Math.max(-90,gimbalDeg-45*dt);
+
+  body.step(dt);
+  const t=body.telemetry;
+  if(model){
+    model.position.set(...t.position);
+    model.quaternion.set(...t.quaternion);
+    // 视觉旋翼降速，避免 6000~9000 RPM 在 60fps 下频闪；HUD 显示真实 RPM
+    visAngle += dt * (t.rpms.reduce((s,x)=>s+x,0)/4) * Math.PI*2/60 * 0.035;
+    rotors.forEach((r,i)=>{if(r) r.rotation.y=SPIN[i]*visAngle;});
+    if(gimbal) gimbal.rotation.x=THREE.MathUtils.degToRad(gimbalDeg);
+  }
+
+  uiT+=dt;
+  if(uiT>0.08){
+    uiT=0;
+    $('t-pos').textContent=t.position.map(x=>x.toFixed(2)).join(', ');
+    $('t-vel').textContent=`${t.speed_mps.toFixed(3)} m/s`;
+    $('t-att').textContent=`${t.pitch_deg.toFixed(1)}° / ${t.roll_deg.toFixed(1)}° / ${t.yaw_deg.toFixed(1)}°`;
+    $('t-omg').textContent=t.omega.map(x=>x.toFixed(2)).join(', ');
+    $('t-thr').textContent=t.thrust_total_n.toFixed(3)+' N';
+    $('t-rpm').textContent=t.rpms.map(x=>Math.round(x)).join(' / ');
+    $('t-eng').textContent=`${t.kinetic_energy_j.toFixed(3)} / ${t.potential_energy_j.toFixed(3)} J`;
+    $('t-con').innerHTML=t.contact?'<span class="ok">接触地面</span>':'空中';
+    const fs=follow.state(model?model.position:HOME_POS);
+    $('t-cam').textContent=`${fs.mode} / ${fs.distance.toFixed(2)}× / 滞后 ${fs.lag.toFixed(3)} m`;
+    $('hud').textContent=
+      `质量      ${PHYSICS.body.mass_kg} kg\n`+
+      `惯量      ${PHYSICS.body.inertia_kgm2.map(x=>x.toFixed(5)).join(' / ')} kg·m²\n`+
+      `油门      ${(body.controls.throttle*100).toFixed(1)} %\n`+
+      `推重比    ${(t.thrust_total_n/(PHYSICS.body.mass_kg*9.81)).toFixed(2)}\n`+
+      `自稳      ${body.stabilize?'开':'关（纯惯性漂移）'}\n`+
+      `风        ${body.wind.map(x=>x.toFixed(2)).join(', ')} N`;
+  }
+  follow.update(dt, model?model.position:HOME_POS, model?model.quaternion:null);
+  renderer.render(scene,camera);
+}
+const w=stage.clientWidth,h=stage.clientHeight;
+renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+tick();
+</script>
+</body>
+</html>

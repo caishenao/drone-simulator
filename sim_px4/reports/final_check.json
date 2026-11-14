@@ -1,0 +1,188 @@
+{
+ "generated_at": "2026-11-12T09:30:03Z",
+ "checks": [
+  {
+   "name": "raw 文件存在且 SHA-256 全部匹配",
+   "pass": true,
+   "detail": "36 files, 0 problems []"
+  },
+  {
+   "name": "PX4 commit 为 40 字符固定版本",
+   "pass": true,
+   "detail": "e5997f455e33ec071c7c677fc59a65781de496a4"
+  },
+  {
+   "name": "下载过程 0 错误",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "normalized 模型数 = 7",
+   "pass": true,
+   "detail": "['iris_demo', 'iris_with_standoffs', 'parrot_bebop_2', 'x500', 'x500_base', 'x500_mini3pro', 'x500_mini3pro_base']"
+  },
+  {
+   "name": "模型结构 iris_demo",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "模型结构 iris_with_standoffs",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "模型结构 parrot_bebop_2",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "模型结构 x500",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "模型结构 x500_base",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "模型结构 x500_mini3pro",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "模型结构 x500_mini3pro_base",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "所有 model:// 网格依赖可解析",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "外部系统模型依赖已记录为缺口",
+   "pass": true,
+   "detail": "1 项: iris_demo: model://gimbal_small_2d"
+  },
+  {
+   "name": "变体含 5 个 OBJ 网格",
+   "pass": true,
+   "detail": "['body.obj', 'rotor_0.obj', 'rotor_1.obj', 'rotor_2.obj', 'rotor_3.obj']"
+  },
+  {
+   "name": "每个 OBJ 都有配套 MTL",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "OBJ 保持 Z-up（高度跨度 < 平面跨度）",
+   "pass": true,
+   "detail": "body z=0.0873 x=0.2268"
+  },
+  {
+   "name": "旋翼网格以桨毂为原点",
+   "pass": true,
+   "detail": "{'rotor_0.obj': -0.073, 'rotor_1.obj': -0.073, 'rotor_2.obj': -0.073, 'rotor_3.obj': -0.073}"
+  },
+  {
+   "name": "两个 PX4 派生模型随附 BSD-3-Clause LICENSE",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "Fuel 元数据含 CC0 许可原文",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "变体保留 9 组碰撞 / 4 个关节 / 5 个 link",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "变体保留 5 个飞控插件",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "变体无 Gazebo Classic 材质脚本残留",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "manifest + 报告齐全",
+   "pass": true,
+   "detail": "manifests=['assets.json', 'downloads.json', 'licenses.json'] reports=['audit.json', 'bridge.json', 'final_check.json', 'physics_gazebo.json', 'validation.json']"
+  }
+ ],
+ "passed": 23,
+ "total": 23,
+ "external_model_dependencies": [
+  "iris_demo: model://gimbal_small_2d"
+ ],
+ "obj_bounds": {
+  "body.obj": {
+   "min": [
+    -0.1134,
+    -0.1021,
+    -0.0489
+   ],
+   "max": [
+    0.1134,
+    0.1054,
+    0.0384
+   ]
+  },
+  "rotor_0.obj": {
+   "min": [
+    -0.073,
+    -0.0147,
+    -0.0026
+   ],
+   "max": [
+    0.073,
+    0.0147,
+    0.0037
+   ]
+  },
+  "rotor_1.obj": {
+   "min": [
+    -0.073,
+    -0.0147,
+    -0.0026
+   ],
+   "max": [
+    0.073,
+    0.0147,
+    0.0037
+   ]
+  },
+  "rotor_2.obj": {
+   "min": [
+    -0.073,
+    -0.0147,
+    -0.0026
+   ],
+   "max": [
+    0.073,
+    0.0147,
+    0.0037
+   ]
+  },
+  "rotor_3.obj": {
+   "min": [
+    -0.073,
+    -0.0147,
+    -0.0026
+   ],
+   "max": [
+    0.073,
+    0.0147,
+    0.0037
+   ]
+  }
+ },
+ "runtime_validation": "not_run: 本机 Windows 无 gz / ros2 / px4"
+}

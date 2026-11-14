@@ -1,0 +1,39 @@
+# —— 依赖（npm install 可重建）——
+node_modules/
+**/node_modules/
+
+# —— 本地密钥：绝不入库 ——
+.env.local
+.env.*.local
+*.pem
+*.key
+*secret*
+*credentials*
+
+# —— 构建产物与运行日志 ——
+web/dist/
+*.log
+
+# —— 自动生成的静态资源 ——
+# Cesium UMD 与 GLB 由 npm run assets 从 node_modules / 上级 .glb 重建
+web/public/cesium/
+web/public/models/
+
+# —— 自检与验收截图（生成物，44 MB）——
+web/shots/
+check_*.png
+
+# —— 编辑器 / 建模备份 ——
+*.blend1
+.DS_Store
+Thumbs.db
+
+# —— 第三方离线运行时（23 MB，主工程不引用）——
+vendor/cesium/
+
+# —— PX4 / Gazebo Fuel 外部模型库（102 MB，可由 manifests 重新拉取）——
+sim_px4/raw/
+sim_px4/normalized/
+
+# —— WorkBuddy 本地工作区数据（会话记忆/自动化，非项目源码）——
+.workbuddy/

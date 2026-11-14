@@ -1,0 +1,44 @@
+{
+  "purpose": "把 Gazebo/PX4 x500 的物理参数换成前端/Godot 共用的 Mini 3 Pro 参数时的换算依据。仅作为估算起点，未在 Gazebo 内试飞标定。",
+  "status": "estimated_not_validated",
+  "current_sdf": {
+    "source": "PX4/PX4-gazebo-models models/x500_base/model.sdf @ e5997f455e33ec071c7c677fc59a65781de496a4",
+    "base_link_mass_kg": 2.0,
+    "base_link_inertia_kgm2": {"ixx": 0.02166666666666667, "iyy": 0.02166666666666667, "izz": 0.04},
+    "rotor_link_mass_kg_each": 0.016076923076923075,
+    "motor_constant": 8.54858e-06,
+    "moment_constant": 0.016,
+    "rotor_drag_coefficient": 8.06428e-05,
+    "rolling_moment_coefficient": 1e-06,
+    "max_rot_velocity_radps": 1000.0,
+    "motor_positions_m": [[0.174, -0.174], [-0.174, 0.174], [0.174, 0.174], [-0.174, -0.174]]
+  },
+  "target_physics": {
+    "source": "无人机/physics/physics.json 与 GLB Drone_Root.extras.physics",
+    "mass_kg": 0.249,
+    "inertia_kgm2": [0.00052, 0.00085, 0.00127],
+    "k_thrust": 1.547e-06,
+    "torque_to_thrust_ratio_m": 0.02,
+    "hover_rpm": 6000,
+    "hover_thrust_per_motor_n": 0.6107,
+    "motor_positions_m": [[0.0873, -0.0873], [-0.0873, -0.0873], [0.0873, 0.0873], [-0.0873, 0.0873]],
+    "visual_scale_used_in_bridge": 1.99313
+  },
+  "derived_scaling": {
+    "mass_ratio": 0.1245,
+    "inertia_ratio_ixx": 0.024,
+    "inertia_ratio_iyy": 0.0392,
+    "inertia_ratio_izz": 0.03175,
+    "motor_arm_ratio": 0.5017,
+    "note": "质量比 ≠ 惯量比 ≠ 力臂比，不能用一个系数统一缩放所有插件参数"
+  },
+  "estimated_changes": [
+    {"field": "base_link mass", "from": 2.0, "to": 0.249, "basis": "physics.json（直接取值）"},
+    {"field": "base_link ixx/iyy/izz", "from": [0.021667, 0.021667, 0.04], "to": [0.00052, 0.00085, 0.00127], "basis": "按质量分布估算，标注 estimated"},
+    {"field": "motorConstant", "from": 8.54858e-06, "to": 1.547e-06, "basis": "T = k·ω²；取前端 k_thrust，悬停 ω ≈ 628 rad/s = 6000 RPM"},
+    {"field": "rotor joint / link pose", "from": "±0.174", "to": "±0.0873", "basis": "Mini 3 Pro 真实轴距 0.247 m（对角）"},
+    {"field": "visual mesh scale", "from": 1.99313, "to": 1.0, "basis": "几何与碰撞同步缩小后不再需要视觉放大"},
+    {"field": "momentConstant / rotorDragCoefficient / rollingMomentCoefficient", "to": "needs_flight_calibration", "basis": "与惯量张量、力臂、桨叶气动同时相关，无可靠解析换算；必须在 Gazebo 里试飞标定"}
+  ],
+  "warning": "以上为估算，不是供应商验证数据。x500 的 MulticopterMotorModel 插件参数是按 2.0 kg 机型标定的，直接改质量会造成推重比失真；改完必须验证悬停、阶跃响应与最大倾角。当前交付的 x500_mini3pro 变体刻意保留 x500 原物理，只替换视觉，见 reports/bridge.json。"
+}

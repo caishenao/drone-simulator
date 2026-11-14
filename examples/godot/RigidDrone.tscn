@@ -1,0 +1,100 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="PackedScene" path="res://drone_mini3pro.glb" id="1_glb"]
+[ext_resource type="Script" path="res://DroneRigidBody.gd" id="2_rigid"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_body"]
+size = Vector3(0.17, 0.098, 0.09)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_motor"]
+radius = 0.015
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_foot"]
+radius = 0.008
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(40, 0.02, 40)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
+size = Vector2(40, 40)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
+albedo_color = Color(0.76, 0.79, 0.82, 1)
+roughness = 0.9
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 1
+background_color = Color(0.42, 0.62, 0.82, 1)
+
+[node name="Main" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866, 0.5, 0, -0.5, 0.866, 0, 1, 0)
+light_energy = 2.2
+
+[node name="Ground" type="StaticBody3D" parent="."]
+
+[node name="GroundShape" type="CollisionShape3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.013, 0)
+shape = SubResource("BoxShape3D_ground")
+
+[node name="GroundMesh" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.003, 0)
+mesh = SubResource("PlaneMesh_ground")
+material_override = SubResource("StandardMaterial3D_ground")
+
+[node name="Drone" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+mass = 0.249
+inertia = Vector3(0.00052, 0.00085, 0.00127)
+linear_damp = 0.0
+angular_damp = 0.0
+gravity_scale = 1.0
+can_sleep = false
+script = ExtResource("2_rigid")
+
+[node name="BodyShape" type="CollisionShape3D" parent="Drone"]
+shape = SubResource("BoxShape3D_body")
+
+[node name="MotorShape0" type="CollisionShape3D" parent="Drone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0873, 0, -0.0873)
+shape = SubResource("SphereShape3D_motor")
+
+[node name="MotorShape1" type="CollisionShape3D" parent="Drone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0873, 0, -0.0873)
+shape = SubResource("SphereShape3D_motor")
+
+[node name="MotorShape2" type="CollisionShape3D" parent="Drone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0873, 0, 0.0873)
+shape = SubResource("SphereShape3D_motor")
+
+[node name="MotorShape3" type="CollisionShape3D" parent="Drone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0873, 0, 0.0873)
+shape = SubResource("SphereShape3D_motor")
+
+[node name="FootShape0" type="CollisionShape3D" parent="Drone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.108, -0.045, -0.1)
+shape = SubResource("SphereShape3D_foot")
+
+[node name="FootShape1" type="CollisionShape3D" parent="Drone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.108, -0.045, -0.1)
+shape = SubResource("SphereShape3D_foot")
+
+[node name="FootShape2" type="CollisionShape3D" parent="Drone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.094, -0.025, 0.094)
+shape = SubResource("SphereShape3D_foot")
+
+[node name="FootShape3" type="CollisionShape3D" parent="Drone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.094, -0.025, 0.094)
+shape = SubResource("SphereShape3D_foot")
+
+[node name="Drone_Root" parent="Drone" instance=ExtResource("1_glb")]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 0.63, 0.62)
+near = 0.01
+far = 100.0
+current = true

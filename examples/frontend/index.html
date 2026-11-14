@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>无人机 GLB · 最小前端接入示例</title>
+<link rel="icon" href="data:,">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#8fb2d0;
+    font:13px/1.6 Consolas,"Microsoft YaHei",monospace}
+  canvas{display:block}
+  #hud{position:fixed;left:14px;top:14px;padding:10px 13px;border-radius:8px;
+    background:rgba(12,20,32,.72);color:#dbe9f8;white-space:pre;pointer-events:none}
+  #err{position:fixed;inset:0;display:grid;place-items:center;background:#101820;
+    color:#ff8a6b;white-space:pre-wrap;text-align:center;padding:24px}
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "../../vendor/three/build/three.module.js",
+    "three/addons/": "../../vendor/three/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="hud">加载中…</div>
+<div id="err" style="display:none"></div>
+
+<script type="module">
+/* ============================================================
+   最小接入：3 个必须知道的事实
+   1) 尺度：模型是真实米制，含桨仅 0.32 m → 相机 near 要小、距离要近
+   2) 坐标：glTF 内 -Z = 机头、+Y = 上（three.js / Godot 一致）
+   3) 节点：Rotor_FL/FR/RL/RR 各自绕局部 Y 转；
+            Gimbal_Pivot 绕局部 X 俯仰；Arm_* 绕 Y 折叠
+   ============================================================ */
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { FollowCamera } from '../../follow_camera.js';
+import { createSkyGround } from '../../sky_ground.js';
+
+const $ = id => document.getElementById(id);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.NeutralToneMapping ?? THREE.ACESFilmicToneMapping;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+// 天空渐变 + 不透明实体地面；地面置于 y=-0.003，模型脚底 ≥ +0.003
+createSkyGround(scene, { scale: 1, gridSize: 2, divisions: 20 });
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.05).texture;
+scene.add(new THREE.HemisphereLight(0xd7e8ff, 0x394150, 1.0));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+sun.position.set(0.4, 0.7, 0.4);
+scene.add(sun);
+
+const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.005, 50);
+camera.position.set(0.32, 0.20, 0.42);          // 米制，别用 3/5/8 这种大数
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, 0);
+controls.enableDamping = true;
+controls.minDistance = 0.12;
+const follow = new FollowCamera(camera, controls, renderer.domElement, {
+  mode:'world', offset:[0.32,0.20,0.42], distance:1,
+  minDistance:0.25, maxDistance:4,
+});
+const HOME_POS = new THREE.Vector3(0,0.052,0);   // 脚架接地高度，防穿模
+follow.snap(HOME_POS,null);
+window.__droneView = {
+  follow, scale: 1,
+  state: () => follow.state(model ? model.position : HOME_POS),
+};
+
+const SPIN = [1, -1, -1, 1];                     // FL / FR / RL / RR
+const TAGS = ['FL', 'FR', 'RL', 'RR'];
+let model = null, rotors = [], gimbal = null, angle = 0;
+const keys = Object.create(null);
+addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (e.code === 'KeyC') follow.cycleMode();
+});
+addEventListener('keyup',   e => keys[e.code] = false);
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+new GLTFLoader().load('../../drone_mini3pro.glb', gltf => {
+  model = gltf.scene;
+  model.position.set(0, 0.052, 0);          // 脚底离地 3 mm
+  scene.add(model);
+  rotors = TAGS.map(t => model.getObjectByName('Rotor_' + t));
+  gimbal = model.getObjectByName('Gimbal_Pivot');
+  const missing = TAGS.filter((t, i) => !rotors[i]);
+  if (missing.length) console.warn('缺少旋翼节点', missing);
+  $('err').style.display = 'none';
+  console.log('根节点 extras:', model.getObjectByName('Drone_Root')?.userData);
+}, undefined, e => {
+  $('hud').style.display = 'none';
+  $('err').style.display = 'grid';
+  $('err').textContent = 'GLB 加载失败: ' + e +
+    '\n请用 HTTP 服务打开（file:// 会被 CORS 拦截）:\n' +
+    'python -m http.server 8899 --directory 无人机';
+});
+
+const clock = new THREE.Clock();
+let pitchDeg = -12;
+function tick() {
+  requestAnimationFrame(tick);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (model) {
+    // 真实 6000 RPM 在 60fps 下会频闪；演示用 480 RPM，产品展示可调 300~900
+    const rpm = 480;
+    angle += rpm * Math.PI * 2 / 60 * dt;
+    rotors.forEach((r, i) => { if (r) r.rotation.y = SPIN[i] * angle; });
+
+    if (keys.ArrowUp)   pitchDeg = Math.min(30, pitchDeg + 40 * dt);
+    if (keys.ArrowDown) pitchDeg = Math.max(-90, pitchDeg - 40 * dt);
+    if (gimbal) gimbal.rotation.x = THREE.MathUtils.degToRad(pitchDeg);
+
+    // 极简飞行：W/S 前后，A/D 左右，空格/Shift 升降
+    const v = new THREE.Vector3();
+    if (keys.KeyW) v.z -= 0.12 * dt;
+    if (keys.KeyS) v.z += 0.12 * dt;
+    if (keys.KeyA) v.x -= 0.12 * dt;
+    if (keys.KeyD) v.x += 0.12 * dt;
+    if (keys.Space) v.y += 0.12 * dt;
+    if (keys.ShiftLeft) v.y -= 0.12 * dt;
+    model.position.add(v);
+    model.position.y = Math.max(0.052, model.position.y);
+
+    $('hud').textContent =
+      `模型    drone_mini3pro.glb  (0.32 m)\n` +
+      `旋翼    480 RPM  |  ${TAGS.join(' / ')}\n` +
+      `云台    ${pitchDeg.toFixed(0)}°\n` +
+      `位置    ${model.position.x.toFixed(2)}, ${model.position.y.toFixed(2)}, ${model.position.z.toFixed(2)}\n` +
+      `按键    WASD 平移 / 空格 Shift 升降 / ↑↓ 云台 / C 切换镜头\n` +
+      `镜头    ${follow.mode} / ${follow.distance.toFixed(2)}× / 滚轮调距离`;
+  }
+  follow.update(dt, model ? model.position : HOME_POS,
+                model ? model.quaternion : null);
+  renderer.render(scene, camera);
+}
+tick();
+</script>
+</body>
+</html>

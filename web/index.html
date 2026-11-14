@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- 移动端：禁缩放防双击误触、viewport-fit=cover 适配刘海屏安全区 -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#0b1520" />
+    <title>无人机模拟器</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/cesium/Widgets/widgets.css" />
+    <script>
+      window.CESIUM_BASE_URL = '/cesium/'
+    </script>
+    <script src="/cesium/Cesium.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

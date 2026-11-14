@@ -1,0 +1,69 @@
+{
+  "schema": "drone-physics/1",
+  "description": "DJI Mini 3 Pro 级四旋翼的统一物理参数；前端 three.js、Vue3 组件与 Godot 共用同一数据源。惯量为按质量分布估算值，非厂商实测。",
+  "coordinate": {
+    "frame": "right-handed, Y-up",
+    "body_forward": "-Z",
+    "body_right": "+X",
+    "body_up": "+Y",
+    "rotor_axis": "local Y (glTF/Godot)",
+    "units": "meter / kilogram / second / newton"
+  },
+  "body": {
+    "mass_kg": 0.249,
+    "inertia_kgm2": [0.00052, 0.00085, 0.00127],
+    "inertia_note": "机身盒体 + 4 个电机集中质量估算，机体系 [Ixx, Iyy, Izz]"
+  },
+  "geometry": {
+    "motor_x_m": 0.0873,
+    "motor_z_m": 0.0873,
+    "diagonal_wheelbase_m": 0.247,
+    "prop_radius_m": 0.073,
+    "contact_radius_m": 0.052,
+    "body_bottom_offset_m": 0.052,
+    "contact_clearance_m": 0.003,
+    "contact_points_local_m": [
+      [-0.108, -0.045, -0.100],
+      [0.108, -0.045, -0.100],
+      [-0.094, -0.025, 0.094],
+      [0.094, -0.025, 0.094]
+    ],
+    "contact_note": "4 个脚架触地点（机体系，Y 上 / -Z 机头）；落地时取旋转后最低点做穿透修正，避免倾斜插地。0.003 m 间隙保证脚底始终高于地面网格。"
+  },
+  "rotor": {
+    "order": ["FL", "FR", "RL", "RR"],
+    "spin": [1, -1, -1, 1],
+    "k_thrust_n_per_rad2s2": 1.547e-6,
+    "k_torque_nm_per_rad2s2": 3.094e-8,
+    "torque_to_thrust_ratio_m": 0.02,
+    "hover_rpm": 6000,
+    "hover_thrust_total_n": 2.443,
+    "max_thrust_total_n": 5.374,
+    "thrust_to_weight": 2.2,
+    "reverse_thrust_ratio": 1.0,
+    "reverse_note": "3D 模式（电机可反转）反向推力上限比例；对称桨正反推力基本相当，倒飞悬停靠它"
+  },
+  "environment": {
+    "gravity_mps2": 9.81,
+    "ground_y_m": 0.0,
+    "linear_drag_kg_per_s": 0.10,
+    "angular_drag_nms": [0.00012, 0.00012, 0.00016],
+    "restitution": 0.25,
+    "friction": 0.55
+  },
+  "control": {
+    "max_rate_pitch_radps": 2.6,
+    "max_rate_roll_radps": 2.6,
+    "max_rate_yaw_radps": 2.2,
+    "rate_gain": 9.0,
+    "stabilize_gain": 3.2,
+    "throttle_hover": 0.455,
+    "stabilize_default": true
+  },
+  "integration": {
+    "fixed_step_s": 0.0041666667,
+    "max_substeps": 12,
+    "max_frame_dt_s": 0.05
+  },
+  "gazebo_note": "sim_px4 的 SDF 沿用 PX4 x500 的 2.0 kg 物理（插件电机参数按该质量标定）。若要换成本文件的 0.249 kg，必须同比重标 motorConstant / momentConstant / rotorDragCoefficient，否则推重比失真。"
+}

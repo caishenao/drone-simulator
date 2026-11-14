@@ -1,0 +1,343 @@
+{
+ "generated_at": "2026-11-12T07:48:02Z",
+ "host_capability": {
+  "gz": false,
+  "ros2": false,
+  "px4": false,
+  "note": "Windows 本机无仿真运行时，仅做静态/结构验证"
+ },
+ "model_count": 5,
+ "total_bytes": 52818168,
+ "download_errors": [],
+ "models": [
+  {
+   "dir": "gazebo-fuel/OpenRobotics/fuel_iris_arducopter/3",
+   "model_config": "gazebo-fuel/OpenRobotics/fuel_iris_arducopter/3/model.config",
+   "model_sdf": "gazebo-fuel/OpenRobotics/fuel_iris_arducopter/3/model.sdf",
+   "name": "Iris with Standoffs and Camera LiftDrag ArduCopter Plugins",
+   "model_version": "1.0",
+   "author": {
+    "name": "Fadri Furrer",
+    "email": "fadri.furrer@mavt.ethz.ch"
+   },
+   "description": "starting with iris_with_standoffs\n    add LiftDragPlugin\n    add ArduCopterPlugin\n    attach gimbal_small_2d model with GimbalSmall2dPlugin",
+   "sdf_version_declared": "1.6",
+   "sdf_root_file": "model.sdf",
+   "sdf_version": "1.6",
+   "sdf_model_name": "iris_demo",
+   "links": 0,
+   "joints": 1,
+   "collisions": 0,
+   "visuals": 0,
+   "sensors": 0,
+   "masses_kg": [],
+   "static": null,
+   "plugins": [
+    {
+     "filename": "libLiftDragPlugin.so",
+     "name": "rotor_0_blade_1"
+    },
+    {
+     "filename": "libLiftDragPlugin.so",
+     "name": "rotor_0_blade_2"
+    },
+    {
+     "filename": "libLiftDragPlugin.so",
+     "name": "rotor_1_blade_1"
+    },
+    {
+     "filename": "libLiftDragPlugin.so",
+     "name": "rotor_1_blade_2"
+    },
+    {
+     "filename": "libLiftDragPlugin.so",
+     "name": "rotor_2_blade_1"
+    },
+    {
+     "filename": "libLiftDragPlugin.so",
+     "name": "rotor_2_blade_2"
+    },
+    {
+     "filename": "libLiftDragPlugin.so",
+     "name": "rotor_3_blade_1"
+    },
+    {
+     "filename": "libLiftDragPlugin.so",
+     "name": "rotor_3_blade_2"
+    },
+    {
+     "filename": "libArduCopterPlugin.so",
+     "name": "arducopter_plugin"
+    }
+   ],
+   "runtime_class": "gazebo_classic",
+   "include_uris": [
+    "model://iris_with_standoffs",
+    "model://gimbal_small_2d"
+   ],
+   "mesh_uris": [],
+   "include_resolution": [
+    {
+     "uri": "model://iris_with_standoffs",
+     "resolved_local": true
+    },
+    {
+     "uri": "model://gimbal_small_2d",
+     "resolved_local": false
+    }
+   ],
+   "mesh_dependencies_found": [],
+   "mesh_dependencies_missing": [],
+   "dae_texture_refs_missing": []
+  },
+  {
+   "dir": "gazebo-fuel/OpenRobotics/fuel_iris_standoffs/3",
+   "model_config": "gazebo-fuel/OpenRobotics/fuel_iris_standoffs/3/model.config",
+   "model_sdf": "gazebo-fuel/OpenRobotics/fuel_iris_standoffs/3/model.sdf",
+   "name": "Iris with Standoffs",
+   "model_version": "1.0",
+   "author": {
+    "name": "Fadri Furrer",
+    "email": "fadri.furrer@mavt.ethz.ch"
+   },
+   "description": "A copy of the 3DR Iris model taken from\n    https://github.com/PX4/sitl_gazebo/tree/master/models\n    Local modifications include adding standoffs,\n    inertia and collision update",
+   "sdf_version_declared": "1.6",
+   "sdf_root_file": "model.sdf",
+   "sdf_version": "1.6",
+   "sdf_model_name": "iris",
+   "links": 7,
+   "joints": 6,
+   "collisions": 5,
+   "visuals": 9,
+   "sensors": 1,
+   "masses_kg": [
+    1.5,
+    0.15,
+    0.15,
+    0.025,
+    0.025,
+    0.025,
+    0.025
+   ],
+   "static": "0",
+   "plugins": [],
+   "runtime_class": "visual_or_inertial_only",
+   "include_uris": [
+    "model://iris_with_standoffs/meshes/iris.dae",
+    "model://iris_with_standoffs/meshes/iris_prop_ccw.dae",
+    "model://iris_with_standoffs/meshes/iris_prop_ccw.dae",
+    "model://iris_with_standoffs/meshes/iris_prop_cw.dae",
+    "model://iris_with_standoffs/meshes/iris_prop_cw.dae"
+   ],
+   "mesh_uris": [
+    "model://iris_with_standoffs/meshes/iris.dae",
+    "model://iris_with_standoffs/meshes/iris_prop_ccw.dae",
+    "model://iris_with_standoffs/meshes/iris_prop_ccw.dae",
+    "model://iris_with_standoffs/meshes/iris_prop_cw.dae",
+    "model://iris_with_standoffs/meshes/iris_prop_cw.dae"
+   ],
+   "mesh_dependencies_found": [
+    "meshes/iris.dae",
+    "meshes/iris_prop_ccw.dae",
+    "meshes/iris_prop_ccw.dae",
+    "meshes/iris_prop_cw.dae",
+    "meshes/iris_prop_cw.dae"
+   ],
+   "mesh_dependencies_missing": [],
+   "dae_texture_refs_missing": []
+  },
+  {
+   "dir": "gazebo-fuel/OpenRobotics/fuel_parrot_bebop_2/3",
+   "model_config": "gazebo-fuel/OpenRobotics/fuel_parrot_bebop_2/3/model.config",
+   "model_sdf": "gazebo-fuel/OpenRobotics/fuel_parrot_bebop_2/3/model.sdf",
+   "name": "Parrot Bebop 2",
+   "model_version": "1.0",
+   "author": {
+    "name": "Olivier Crave",
+    "email": "olivier.crave@parrot.com"
+   },
+   "description": "A model of the Parrot Bebop 2 drone.",
+   "sdf_version_declared": "1.5",
+   "sdf_root_file": "model.sdf",
+   "sdf_version": "1.5",
+   "sdf_model_name": "parrot_bebop_2",
+   "links": 1,
+   "joints": 0,
+   "collisions": 1,
+   "visuals": 5,
+   "sensors": 0,
+   "masses_kg": [
+    0.503
+   ],
+   "static": "false",
+   "plugins": [],
+   "runtime_class": "visual_or_inertial_only",
+   "include_uris": [
+    "model://parrot_bebop_2/meshes/hull.dae",
+    "model://parrot_bebop_2/meshes/propeller_rr.dae",
+    "model://parrot_bebop_2/meshes/propeller_rl.dae",
+    "model://parrot_bebop_2/meshes/propeller_fr.dae",
+    "model://parrot_bebop_2/meshes/propeller_fl.dae"
+   ],
+   "mesh_uris": [
+    "model://parrot_bebop_2/meshes/hull.dae",
+    "model://parrot_bebop_2/meshes/propeller_rr.dae",
+    "model://parrot_bebop_2/meshes/propeller_rl.dae",
+    "model://parrot_bebop_2/meshes/propeller_fr.dae",
+    "model://parrot_bebop_2/meshes/propeller_fl.dae"
+   ],
+   "mesh_dependencies_found": [
+    "meshes/hull.dae",
+    "meshes/propeller_rr.dae",
+    "meshes/propeller_rl.dae",
+    "meshes/propeller_fr.dae",
+    "meshes/propeller_fl.dae"
+   ],
+   "mesh_dependencies_missing": [],
+   "dae_texture_refs_missing": []
+  },
+  {
+   "dir": "px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500",
+   "model_config": "px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500/model.config",
+   "model_sdf": "px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500/model.sdf",
+   "name": "x500",
+   "model_version": "1.0",
+   "author": {
+    "name": "Benjamin Perseghetti",
+    "email": "bperseghetti@rudislabs.com"
+   },
+   "description": "Model of the NXP HoverGames Drone development kit (KIT-HGDRONEK66). The PX4 software compatible kit provides mechanical, RC remote and other components needed to evaluate the RDDRO",
+   "sdf_version_declared": "1.9",
+   "sdf_root_file": "model.sdf",
+   "sdf_version": "1.9",
+   "sdf_model_name": "x500",
+   "links": 0,
+   "joints": 0,
+   "collisions": 0,
+   "visuals": 0,
+   "sensors": 0,
+   "masses_kg": [],
+   "static": null,
+   "plugins": [
+    {
+     "filename": "gz-sim-multicopter-motor-model-system",
+     "name": "gz::sim::systems::MulticopterMotorModel"
+    },
+    {
+     "filename": "gz-sim-multicopter-motor-model-system",
+     "name": "gz::sim::systems::MulticopterMotorModel"
+    },
+    {
+     "filename": "gz-sim-multicopter-motor-model-system",
+     "name": "gz::sim::systems::MulticopterMotorModel"
+    },
+    {
+     "filename": "gz-sim-multicopter-motor-model-system",
+     "name": "gz::sim::systems::MulticopterMotorModel"
+    },
+    {
+     "filename": "MotorFailurePlugin",
+     "name": "gz::sim::systems::MotorFailureSystem"
+    }
+   ],
+   "runtime_class": "gazebo_sim_gz",
+   "include_uris": [
+    "model://x500_base"
+   ],
+   "mesh_uris": [],
+   "include_resolution": [
+    {
+     "uri": "model://x500_base",
+     "resolved_local": true
+    }
+   ],
+   "mesh_dependencies_found": [],
+   "mesh_dependencies_missing": [],
+   "dae_texture_refs_missing": []
+  },
+  {
+   "dir": "px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base",
+   "model_config": "px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/model.config",
+   "model_sdf": "px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/model.sdf",
+   "name": "x500_base",
+   "model_version": "1.0",
+   "author": {
+    "name": "Benjamin Perseghetti",
+    "email": "bperseghetti@rudislabs.com"
+   },
+   "description": "Model of the NXP HoverGames Drone development kit (KIT-HGDRONEK66). The PX4 software compatible kit provides mechanical, RC remote and other components needed to evaluate the RDDRO",
+   "sdf_version_declared": "1.9",
+   "sdf_root_file": "model.sdf",
+   "sdf_version": "1.9",
+   "sdf_model_name": "x500_base",
+   "links": 5,
+   "joints": 4,
+   "collisions": 9,
+   "visuals": 16,
+   "sensors": 4,
+   "masses_kg": [
+    2.0,
+    0.016076923076923075,
+    0.016076923076923075,
+    0.016076923076923075,
+    0.016076923076923075
+   ],
+   "static": "false",
+   "plugins": [],
+   "runtime_class": "visual_or_inertial_only",
+   "include_uris": [
+    "model://x500_base/meshes/NXP-HGD-CF.dae",
+    "model://x500_base/meshes/5010Base.dae",
+    "model://x500_base/meshes/5010Base.dae",
+    "model://x500_base/meshes/5010Base.dae",
+    "model://x500_base/meshes/5010Base.dae",
+    "model://x500_base/meshes/1345_prop_ccw.stl",
+    "model://x500_base/meshes/5010Bell.dae",
+    "model://x500_base/meshes/1345_prop_ccw.stl",
+    "model://x500_base/meshes/5010Bell.dae",
+    "model://x500_base/meshes/1345_prop_cw.stl",
+    "model://x500_base/meshes/5010Bell.dae",
+    "model://x500_base/meshes/1345_prop_cw.stl",
+    "model://x500_base/meshes/5010Bell.dae"
+   ],
+   "mesh_uris": [
+    "model://x500_base/meshes/NXP-HGD-CF.dae",
+    "model://x500_base/meshes/5010Base.dae",
+    "model://x500_base/meshes/5010Base.dae",
+    "model://x500_base/meshes/5010Base.dae",
+    "model://x500_base/meshes/5010Base.dae",
+    "model://x500_base/meshes/1345_prop_ccw.stl",
+    "model://x500_base/meshes/5010Bell.dae",
+    "model://x500_base/meshes/1345_prop_ccw.stl",
+    "model://x500_base/meshes/5010Bell.dae",
+    "model://x500_base/meshes/1345_prop_cw.stl",
+    "model://x500_base/meshes/5010Bell.dae",
+    "model://x500_base/meshes/1345_prop_cw.stl",
+    "model://x500_base/meshes/5010Bell.dae"
+   ],
+   "mesh_dependencies_found": [
+    "meshes/NXP-HGD-CF.dae",
+    "meshes/5010Base.dae",
+    "meshes/5010Base.dae",
+    "meshes/5010Base.dae",
+    "meshes/5010Base.dae",
+    "meshes/1345_prop_ccw.stl",
+    "meshes/5010Bell.dae",
+    "meshes/1345_prop_ccw.stl",
+    "meshes/5010Bell.dae",
+    "meshes/1345_prop_cw.stl",
+    "meshes/5010Bell.dae",
+    "meshes/1345_prop_cw.stl",
+    "meshes/5010Bell.dae"
+   ],
+   "mesh_dependencies_missing": [],
+   "dae_texture_refs_missing": []
+  }
+ ],
+ "checks": {
+  "all_model_sdf_present": true,
+  "all_mesh_deps_present": true,
+  "all_dae_textures_present": true,
+  "px4_commit_fixed": true
+ }
+}

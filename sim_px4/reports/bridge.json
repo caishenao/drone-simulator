@@ -1,0 +1,79 @@
+{
+ "generated_at": "2026-11-12T07:47:13Z",
+ "status": "visual_only_replacement",
+ "kept_physics": {
+  "source": "PX4/PX4-gazebo-models x500_base @ e5997f455e33ec071c7c677fc59a65781de496a4",
+  "base_mass_kg": 2.0,
+  "motor_positions_m": [
+   [
+    0.174,
+    -0.174
+   ],
+   [
+    -0.174,
+    0.174
+   ],
+   [
+    0.174,
+    0.174
+   ],
+   [
+    -0.174,
+    -0.174
+   ]
+  ],
+  "plugins": [
+   "gz-sim-multicopter-motor-model-system x4",
+   "MotorFailurePlugin"
+  ]
+ },
+ "visual": {
+  "source_glb": "drone_mini3pro.glb",
+  "exported_meshes": [
+   "body.mtl",
+   "body.obj",
+   "rotor_0.mtl",
+   "rotor_0.obj",
+   "rotor_1.mtl",
+   "rotor_1.obj",
+   "rotor_2.mtl",
+   "rotor_2.obj",
+   "rotor_3.mtl",
+   "rotor_3.obj"
+  ],
+  "scale": 1.99313,
+  "yaw_rad": -1.5707963,
+  "rotor_map": {
+   "rotor_0": "Rotor_RR",
+   "rotor_1": "Rotor_FL",
+   "rotor_2": "Rotor_FR",
+   "rotor_3": "Rotor_RL"
+  }
+ },
+ "changes": [
+  "base_link_visual -> body.obj (scale + yaw -90deg)",
+  "removed 5010_motor_base_0",
+  "removed 5010_motor_base_1",
+  "removed 5010_motor_base_2",
+  "removed 5010_motor_base_3",
+  "removed NXP_FMUK66_FRONT",
+  "removed NXP_FMUK66_TOP",
+  "removed RDDRONE_FMUK66_TOP",
+  "rotor_0_visual -> rotor_0.obj (hub at origin, classic material removed)",
+  "removed rotor_0_visual_motor_bell",
+  "rotor_1_visual -> rotor_1.obj (hub at origin, classic material removed)",
+  "removed rotor_1_visual_motor_top",
+  "rotor_2_visual -> rotor_2.obj (hub at origin, classic material removed)",
+  "removed rotor_2_visual_motor_top",
+  "rotor_3_visual -> rotor_3.obj (hub at origin, classic material removed)",
+  "removed rotor_3_visual_motor_top",
+  "top include -> x500_mini3pro_base"
+ ],
+ "license_note": "BSD-3-Clause (Rudis Laboratories 2022) 原文已随两个模型目录复制；分发时必须保留版权声明与免责声明。",
+ "limitations": [
+  "物理参数仍是 x500（2.0 kg / 0.348 m 对角电机距），外形是 1.993x 放大的 Mini 3 Pro，属于视觉替换而非物理重建",
+  "OBJ/MTL 材质在 gz-rendering 中不等价于 glTF PBR，颜色可能有偏差",
+  "本机无 gz/ros2/px4，YAW 偏移与缩放需在目标主机用最小 world 目视核对"
+ ],
+ "run": "PX4_GZ_MODEL=x500_mini3pro bash start_px4_sitl.sh"
+}

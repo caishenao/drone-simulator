@@ -1,0 +1,81 @@
+{
+ "generated_at": "2026-11-12T07:48:02Z",
+ "host_capability": {
+  "gz": false,
+  "ros2": false,
+  "px4": false,
+  "note": "Windows 本机无仿真运行时，仅做静态/结构验证"
+ },
+ "static_checks": {
+  "all_model_sdf_present": true,
+  "all_mesh_deps_present": true,
+  "all_dae_textures_present": true,
+  "px4_commit_fixed": true
+ },
+ "normalized_models": {
+  "x500": {
+   "ok": true,
+   "state": "kept",
+   "source": "px4-gazebo-models\\e5997f455e33ec071c7c677fc59a65781de496a4\\models\\x500",
+   "description": "PX4 官方 SITL 四旋翼，含 4x MulticopterMotorModel 插件",
+   "runtime": "Gazebo Sim (gz)",
+   "has_config": true,
+   "has_sdf": true
+  },
+  "x500_base": {
+   "ok": true,
+   "state": "kept",
+   "source": "px4-gazebo-models\\e5997f455e33ec071c7c677fc59a65781de496a4\\models\\x500_base",
+   "description": "x500 的物理/视觉基础模型（被 x500 include merge）",
+   "runtime": "Gazebo Sim (gz)",
+   "has_config": true,
+   "has_sdf": true
+  },
+  "parrot_bebop_2": {
+   "ok": true,
+   "state": "kept",
+   "source": "gazebo-fuel\\OpenRobotics\\fuel_parrot_bebop_2\\3",
+   "description": "CC0 消费级四旋翼，含惯量/碰撞，但无电机插件",
+   "runtime": "Gazebo Classic / Sim 视觉",
+   "has_config": true,
+   "has_sdf": true
+  },
+  "iris_with_standoffs": {
+   "ok": true,
+   "state": "kept",
+   "source": "gazebo-fuel\\OpenRobotics\\fuel_iris_standoffs\\3",
+   "description": "CC0 3DR Iris，7 link / 5 collision / 无插件",
+   "runtime": "Gazebo Classic",
+   "has_config": true,
+   "has_sdf": true
+  },
+  "iris_demo": {
+   "ok": true,
+   "state": "kept",
+   "source": "gazebo-fuel\\OpenRobotics\\fuel_iris_arducopter\\3",
+   "description": "CC0 ArduCopter + LiftDrag + 云台插件演示（依赖 gimbal_small_2d）",
+   "runtime": "Gazebo Classic (EOL)",
+   "has_config": true,
+   "has_sdf": true
+  }
+ },
+ "runtime_validation": {
+  "status": "not_run",
+  "reason": "本机 Windows 无 gz / ros2 / px4，无法启动最小 world 或检查插件加载",
+  "required_on_target_host": [
+   "gz sim 能解析 model://x500 与 model://x500_base",
+   "gz-sim-multicopter-motor-model-system 插件可加载",
+   "MotorFailurePlugin 有对应编译产物（PX4 构建提供）",
+   "make px4_sitl gz_x500 能连上仿真、/fmu/out/vehicle_odometry 有数据"
+  ]
+ },
+ "gaps": [
+  "Iris + ArduCopter 演示版依赖 model://gimbal_small_2d，本地未下载；且属 Gazebo Classic / ArduPilot，与 PX4 SITL 不同栈",
+  "Parrot Bebop 2 与 Iris with Standoffs 都没有电机插件，只能作为视觉或惯量模型",
+  "PX4 x500 / x500_base 是 BSD-3-Clause（Rudis Laboratories 2022），分发时必须保留 LICENSE 与版权声明",
+  "x500_base 物理质量为 2.0 kg、对角电机间距 0.348 m；与自建 Mini 3 Pro 外形（0.247 m 轴距）不一致，视觉替换需缩放并标注为 visual_only",
+  "缩略图（thumbnails/*.png）按设计未下载，不影响仿真"
+ ],
+ "recommended_primary": "normalized/models/x500 + x500_base @ e5997f455e33ec071c7c677fc59a65781de496a4",
+ "total_downloaded_bytes": 52818168
+}

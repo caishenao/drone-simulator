@@ -1,0 +1,343 @@
+{
+ "generated_at": "2026-11-12T07:38:11Z",
+ "sources": {
+  "gazebo-fuel": "https://fuel.gazebosim.org/1.0",
+  "px4-gazebo-models": "https://github.com/PX4/PX4-gazebo-models/tree/e5997f455e33ec071c7c"
+ },
+ "px4_commit": "e5997f455e33ec071c7c677fc59a65781de496a4",
+ "files": [
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_parrot_bebop_2/3/_model_detail.json",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Parrot%20Bebop%202",
+   "bytes": 686,
+   "sha256": "729a63ebaffdaf3238d9ddbe70d282d0ae44e12fd80a0670101eeddee1c99799",
+   "retrieved_at": "2026-11-12T07:36:46Z",
+   "kind": "metadata"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_parrot_bebop_2/3/_file_tree.json",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Parrot%20Bebop%202/3/files",
+   "bytes": 1117,
+   "sha256": "93f03aae0be130ea84cedbe6ae7705dd51a088fef71ba09a3c1afb807d674ce8",
+   "retrieved_at": "2026-11-12T07:36:46Z",
+   "kind": "metadata"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_parrot_bebop_2/3/meshes/hull.dae",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Parrot%20Bebop%202/3/files/meshes/hull.dae",
+   "bytes": 2310706,
+   "sha256": "5d64b4908647a8c60e63c329504d33b1ea281fc489d533502a83c19ccfa6e548",
+   "retrieved_at": "2026-11-12T07:36:53Z",
+   "asset_id": "fuel_parrot_bebop_2",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_parrot_bebop_2/3/meshes/propeller_fl.dae",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Parrot%20Bebop%202/3/files/meshes/propeller_fl.dae",
+   "bytes": 214323,
+   "sha256": "ac5c8b32571b2106a64144328c474aa0d3bf35805d229f837247c214385fb6dd",
+   "retrieved_at": "2026-11-12T07:36:55Z",
+   "asset_id": "fuel_parrot_bebop_2",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_parrot_bebop_2/3/meshes/propeller_fr.dae",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Parrot%20Bebop%202/3/files/meshes/propeller_fr.dae",
+   "bytes": 174126,
+   "sha256": "794d499b57370493ef2bdf3d95943f9e3be5d2fadc3a2ac0ab3aad75be89c8ab",
+   "retrieved_at": "2026-11-12T07:36:58Z",
+   "asset_id": "fuel_parrot_bebop_2",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_parrot_bebop_2/3/meshes/propeller_rl.dae",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Parrot%20Bebop%202/3/files/meshes/propeller_rl.dae",
+   "bytes": 175080,
+   "sha256": "d1a4aabd61919a038a33633725083d65bbddbdadb125ce379e88be5fba2c7d1e",
+   "retrieved_at": "2026-11-12T07:37:01Z",
+   "asset_id": "fuel_parrot_bebop_2",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_parrot_bebop_2/3/meshes/propeller_rr.dae",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Parrot%20Bebop%202/3/files/meshes/propeller_rr.dae",
+   "bytes": 175220,
+   "sha256": "85c33f4a74d39f22a79b9d4a168c6db87961f1c719b238a343a13e63072f18d0",
+   "retrieved_at": "2026-11-12T07:37:04Z",
+   "asset_id": "fuel_parrot_bebop_2",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_parrot_bebop_2/3/model.config",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Parrot%20Bebop%202/3/files/model.config",
+   "bytes": 325,
+   "sha256": "9d59d1cc8bfd0f26998be7d729f9f45461ef52c8c8b835f6f7fca7184a1140c4",
+   "retrieved_at": "2026-11-12T07:37:06Z",
+   "asset_id": "fuel_parrot_bebop_2",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_parrot_bebop_2/3/model.sdf",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Parrot%20Bebop%202/3/files/model.sdf",
+   "bytes": 2605,
+   "sha256": "95b933b1a3ceb804af7feddad95e1ea9b032232b8f04a267c6730dc650929935",
+   "retrieved_at": "2026-11-12T07:37:08Z",
+   "asset_id": "fuel_parrot_bebop_2",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_iris_standoffs/3/_model_detail.json",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Iris%20with%20Standoffs",
+   "bytes": 846,
+   "sha256": "2cc8f0868e4884418e6c62ba0e2ccf65acb84a76490e1c453e7f8ead23cadfb4",
+   "retrieved_at": "2026-11-12T07:37:12Z",
+   "kind": "metadata"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_iris_standoffs/3/_file_tree.json",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Iris%20with%20Standoffs/3/files",
+   "bytes": 952,
+   "sha256": "193f4581d0e6ea983a099cac3ad7b1df7ad2f3f667562c1170ac323e73c30b2f",
+   "retrieved_at": "2026-11-12T07:37:12Z",
+   "kind": "metadata"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_iris_standoffs/3/meshes/iris.dae",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Iris%20with%20Standoffs/3/files/meshes/iris.dae",
+   "bytes": 21644731,
+   "sha256": "697956cfc0fe608afc52a0f688de50354b89e5201056451cf6bb767de8f46323",
+   "retrieved_at": "2026-11-12T07:37:24Z",
+   "asset_id": "fuel_iris_standoffs",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_iris_standoffs/3/meshes/iris_prop_ccw.dae",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Iris%20with%20Standoffs/3/files/meshes/iris_prop_ccw.dae",
+   "bytes": 308284,
+   "sha256": "5f8b01668ee24a5b663ca8c4dd56e294fd6480db7eec1e5a7c11e45ba9004e99",
+   "retrieved_at": "2026-11-12T07:37:27Z",
+   "asset_id": "fuel_iris_standoffs",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_iris_standoffs/3/meshes/iris_prop_cw.dae",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Iris%20with%20Standoffs/3/files/meshes/iris_prop_cw.dae",
+   "bytes": 354209,
+   "sha256": "6cbc686772dccd46253fb65ece000e7ffa6a74b9c097bda349884bd1e78cd879",
+   "retrieved_at": "2026-11-12T07:37:30Z",
+   "asset_id": "fuel_iris_standoffs",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_iris_standoffs/3/model.config",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Iris%20with%20Standoffs/3/files/model.config",
+   "bytes": 743,
+   "sha256": "daa383410988d490e895a4bca2ffb565d481ff58ce63b3cacb63ae1583ab9a95",
+   "retrieved_at": "2026-11-12T07:37:32Z",
+   "asset_id": "fuel_iris_standoffs",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_iris_standoffs/3/model.sdf",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Iris%20with%20Standoffs/3/files/model.sdf",
+   "bytes": 13523,
+   "sha256": "52641fc46e36208f36cfcae14cde80b23568cac118ffdfe9bde98f0b53785cde",
+   "retrieved_at": "2026-11-12T07:37:34Z",
+   "asset_id": "fuel_iris_standoffs",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_iris_arducopter/3/_model_detail.json",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Iris%20with%20Standoffs%20and%20Camera%20LiftDrag%20ArduCopter%20Plugins",
+   "bytes": 889,
+   "sha256": "177f0284bba266e35f734983054c15429cf27c99dcd206826e1d22d5323ce742",
+   "retrieved_at": "2026-11-12T07:37:39Z",
+   "kind": "metadata"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_iris_arducopter/3/_file_tree.json",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Iris%20with%20Standoffs%20and%20Camera%20LiftDrag%20ArduCopter%20Plugins/3/files",
+   "bytes": 674,
+   "sha256": "74d0a27417a1535c1e737d30e3c7224a2b2a72ba0e6e2ed0f33ae0e22dde43e0",
+   "retrieved_at": "2026-11-12T07:37:39Z",
+   "kind": "metadata"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_iris_arducopter/3/model.config",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Iris%20with%20Standoffs%20and%20Camera%20LiftDrag%20ArduCopter%20Plugins/3/files/model.config",
+   "bytes": 955,
+   "sha256": "0a1682db475a94261fc97de41e6dff43b61ea1a4baaf4fc9358631dae61424b1",
+   "retrieved_at": "2026-11-12T07:37:41Z",
+   "asset_id": "fuel_iris_arducopter",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/gazebo-fuel/OpenRobotics/fuel_iris_arducopter/3/model.sdf",
+   "source_url": "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Iris%20with%20Standoffs%20and%20Camera%20LiftDrag%20ArduCopter%20Plugins/3/files/model.sdf",
+   "bytes": 16115,
+   "sha256": "6ad4d92c33d39dd7b8b84152ce790117406acce1d72295676c17fd0dbdce431e",
+   "retrieved_at": "2026-11-12T07:37:43Z",
+   "asset_id": "fuel_iris_arducopter",
+   "revision_or_version": "3"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/_git_tree.json",
+   "source_url": "https://api.github.com/repos/PX4/PX4-gazebo-models/git/trees/e5997f455e33ec071c7c677fc59a65781de496a4?recursive=1",
+   "bytes": 1045,
+   "sha256": "e0b6e24ce78c2a3de224bf9235dcd84545d89759dbe543b63d34baf7ce86e098",
+   "retrieved_at": "2026-11-12T07:37:44Z",
+   "kind": "metadata"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500/LICENSE",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500/LICENSE",
+   "bytes": 1526,
+   "sha256": "cee4ef94e73cd38fb2886f5d7e7a04d6488f54b1e70cd8b1b29d74f38bfdba5b",
+   "retrieved_at": "2026-11-12T07:37:45Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "3e6603245349acf75950dfad6a5c3c4136384cb6"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500/model.config",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500/model.config",
+   "bytes": 768,
+   "sha256": "52fdda8e66faa5095434d54e4dcaad5a6a8833cd014e0a5b439349ed8b4a1b67",
+   "retrieved_at": "2026-11-12T07:37:46Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "d927576e36881202e3845846f49d3db834a34427"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500/model.sdf",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500/model.sdf",
+   "bytes": 3533,
+   "sha256": "cb76a4afd439f253a8c516b1fcd3528f80347619cfa46bebb620557054fbf125",
+   "retrieved_at": "2026-11-12T07:37:47Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "2dd80a136d9d265f1f76d7563dbf729f60d92f36"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/LICENSE",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/LICENSE",
+   "bytes": 1526,
+   "sha256": "cee4ef94e73cd38fb2886f5d7e7a04d6488f54b1e70cd8b1b29d74f38bfdba5b",
+   "retrieved_at": "2026-11-12T07:37:48Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "3e6603245349acf75950dfad6a5c3c4136384cb6"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/materials/textures/CF.png",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/materials/textures/CF.png",
+   "bytes": 1567802,
+   "sha256": "3a56ec48eeaaf7774e8d3e8e5e88f6973bfa5652c610974c3eb2dbec6ec85944",
+   "retrieved_at": "2026-11-12T07:37:50Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "1b52fe90d84ecb3a9fcdacdf7f0465b2d49e1bca"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/materials/textures/nxp.png",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/materials/textures/nxp.png",
+   "bytes": 25522,
+   "sha256": "6c2262c84e0f5f55dbe38e712e6508d654fb6e7c427d1a19cdd62231bc2d52b1",
+   "retrieved_at": "2026-11-12T07:37:51Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "20cf4ee3f0732ff5da5067c89218b29f1b6f7878"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/materials/textures/rd.png",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/materials/textures/rd.png",
+   "bytes": 26435,
+   "sha256": "9d8851c37dc612c336b46e41744c17fb8333a0af33ac4be93f7147f7549a8e25",
+   "retrieved_at": "2026-11-12T07:37:52Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "c8cce08d51b2c57be9fe9ad718e142e088d4c0b2"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/meshes/1345_prop_ccw.stl",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/meshes/1345_prop_ccw.stl",
+   "bytes": 522784,
+   "sha256": "ba197e0961117a3462b555d65edf3433ba8ff5691624100a185242cb5f456244",
+   "retrieved_at": "2026-11-12T07:37:54Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "0bc8fd219df5082e91e4196fe405344474eddf75"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/meshes/1345_prop_cw.stl",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/meshes/1345_prop_cw.stl",
+   "bytes": 521884,
+   "sha256": "7aa4b61c1ddc5304c9c1f5602eacf5e2ec5eafb95dd1f2a3368342f256122fc0",
+   "retrieved_at": "2026-11-12T07:37:55Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "38bb36c251181e5e5335619b66e8a9420223d2ae"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/meshes/5010Base.dae",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/meshes/5010Base.dae",
+   "bytes": 369574,
+   "sha256": "798396a1945c7ff55a0840b77869e27affdd35fed0d784fff96b68f50f160ea0",
+   "retrieved_at": "2026-11-12T07:37:57Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "2410622662cef9e2f4cf001b3617647d4c7eedda"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/meshes/5010Bell.dae",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/meshes/5010Bell.dae",
+   "bytes": 393792,
+   "sha256": "b90a1b2dd63a8ebbe1f3339ed18cef23673e0d8f03314fd9b9533a68b6b66668",
+   "retrieved_at": "2026-11-12T07:37:58Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "24b41e5a3acb46c9e88467c4c7e56ca0057f1cb6"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/meshes/CF.png",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/meshes/CF.png",
+   "bytes": 1567802,
+   "sha256": "3a56ec48eeaaf7774e8d3e8e5e88f6973bfa5652c610974c3eb2dbec6ec85944",
+   "retrieved_at": "2026-11-12T07:38:01Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "1b52fe90d84ecb3a9fcdacdf7f0465b2d49e1bca"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/meshes/NXP-HGD-CF.dae",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/meshes/NXP-HGD-CF.dae",
+   "bytes": 22399616,
+   "sha256": "7321861b113866996dfa79b403def5666d4b796810840d2c057c7b51fc315b0a",
+   "retrieved_at": "2026-11-12T07:38:09Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "92f1ac693ae28f8e5bb5e3c6da4d3fe9880d918e"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/model.config",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/model.config",
+   "bytes": 773,
+   "sha256": "4856afbdeb52f19468f56ddaf4be57c04688f347b8cef2f609daacd2d014d437",
+   "retrieved_at": "2026-11-12T07:38:10Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "37382f6e5466d85f08b2d8347d3c6b40afa59be3"
+  },
+  {
+   "path": "raw/px4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/model.sdf",
+   "source_url": "https://raw.githubusercontent.com/PX4/PX4-gazebo-models/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base/model.sdf",
+   "bytes": 17726,
+   "sha256": "6eccbff824a0e1ceaaf3bc12fe18cd0eb3ece890bf995a2607b477c3d2ae5772",
+   "retrieved_at": "2026-11-12T07:38:11Z",
+   "asset_id": "px4_x500",
+   "revision_or_version": "e5997f455e33ec071c7c",
+   "git_blob_sha": "b7d0b7b3e238152ed91426e9e8869af938a45d85"
+  }
+ ],
+ "errors": []
+}

@@ -1,0 +1,23 @@
+; Godot 4.x 无人机物理工程
+; 用 Godot 编辑器「导入」打开本目录，或命令行 `godot --path .`。
+; 首次打开会自动导入 drone_mini3pro.glb 并生成 .godot/imported/。
+;
+; 默认主场景 = RigidDrone.tscn（真实刚体：质量/惯量/碰撞/重力/推力）。
+; 轻量运动学版保留在 Drone.tscn，可手动切换 run/main_scene。
+; 输入映射无需配置：两个脚本都内置了物理键码回退。
+
+config_version=5
+
+[application]
+
+config/name="Drone Mini 3 Pro Physics"
+run/main_scene="res://RigidDrone.tscn"
+config/features=PackedStringArray("4.2", "GL Compatibility")
+
+[physics]
+
+3d/default_gravity=9.81
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"

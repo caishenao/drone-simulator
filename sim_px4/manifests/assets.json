@@ -1,0 +1,235 @@
+[
+ {
+  "asset_id": "fuel_iris_arducopter",
+  "display_name": "Iris with Standoffs and Camera LiftDrag ArduCopter Plugins",
+  "source": {
+   "library": "gazebo-fuel",
+   "page_url": "https://app.gazebosim.org/OpenRobotics/fuel/models/Iris with Standoffs and Camera LiftDrag ArduCopter Plugins",
+   "repository_or_dataset": "OpenRobotics @ Gazebo Fuel",
+   "revision_or_version": "3",
+   "source_asset_id": "iris_demo"
+  },
+  "retrieved_at": "2026-11-12T07:38:11Z",
+  "license": {
+   "status": "approved",
+   "spdx": "CC0-1.0",
+   "source_text": "Creative Commons Zero v1.0 Universal",
+   "commercial_use": "allowed",
+   "attribution_required": false,
+   "manual_review": false,
+   "source": "gazebo-fuel REST API model record",
+   "license_name": "Creative Commons Zero v1.0 Universal",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "retrieved_at": "2026-11-12T07:38:11Z"
+  },
+  "formats": [
+   "sdf",
+   "dae",
+   "stl",
+   "png"
+  ],
+  "runtime": [
+   "gazebo_classic"
+  ],
+  "units": "meters (SDF default)",
+  "up_axis": "Z",
+  "simulation": {
+   "collision": "missing",
+   "rigid_body": "missing",
+   "mass": "missing",
+   "friction": "unknown",
+   "joints": "present",
+   "semantic_labels": "missing",
+   "validation_profile": null,
+   "validation_status": "not_run (no gz/ros2/px4 on this host)",
+   "plugin_class": "gazebo_classic"
+  },
+  "status": "approved"
+ },
+ {
+  "asset_id": "fuel_iris_standoffs",
+  "display_name": "Iris with Standoffs",
+  "source": {
+   "library": "gazebo-fuel",
+   "page_url": "https://app.gazebosim.org/OpenRobotics/fuel/models/Iris with Standoffs",
+   "repository_or_dataset": "OpenRobotics @ Gazebo Fuel",
+   "revision_or_version": "3",
+   "source_asset_id": "iris"
+  },
+  "retrieved_at": "2026-11-12T07:38:11Z",
+  "license": {
+   "status": "approved",
+   "spdx": "CC0-1.0",
+   "source_text": "Creative Commons Zero v1.0 Universal",
+   "commercial_use": "allowed",
+   "attribution_required": false,
+   "manual_review": false,
+   "source": "gazebo-fuel REST API model record",
+   "license_name": "Creative Commons Zero v1.0 Universal",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "retrieved_at": "2026-11-12T07:38:11Z"
+  },
+  "formats": [
+   "sdf",
+   "dae",
+   "stl",
+   "png"
+  ],
+  "runtime": [
+   "gazebo_classic"
+  ],
+  "units": "meters (SDF default)",
+  "up_axis": "Z",
+  "simulation": {
+   "collision": "present",
+   "rigid_body": "present",
+   "mass": "present",
+   "friction": "present (surface/friction)",
+   "joints": "present",
+   "semantic_labels": "missing",
+   "validation_profile": null,
+   "validation_status": "not_run (no gz/ros2/px4 on this host)",
+   "plugin_class": "visual_or_inertial_only"
+  },
+  "status": "approved"
+ },
+ {
+  "asset_id": "fuel_parrot_bebop_2",
+  "display_name": "Parrot Bebop 2",
+  "source": {
+   "library": "gazebo-fuel",
+   "page_url": "https://app.gazebosim.org/OpenRobotics/fuel/models/Parrot Bebop 2",
+   "repository_or_dataset": "OpenRobotics @ Gazebo Fuel",
+   "revision_or_version": "3",
+   "source_asset_id": "parrot_bebop_2"
+  },
+  "retrieved_at": "2026-11-12T07:38:11Z",
+  "license": {
+   "status": "approved",
+   "spdx": "CC0-1.0",
+   "source_text": "Creative Commons Zero v1.0 Universal",
+   "commercial_use": "allowed",
+   "attribution_required": false,
+   "manual_review": false,
+   "source": "gazebo-fuel REST API model record",
+   "license_name": "Creative Commons Zero v1.0 Universal",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "retrieved_at": "2026-11-12T07:38:11Z"
+  },
+  "formats": [
+   "sdf",
+   "dae",
+   "stl",
+   "png"
+  ],
+  "runtime": [
+   "gazebo_classic"
+  ],
+  "units": "meters (SDF default)",
+  "up_axis": "Z",
+  "simulation": {
+   "collision": "present",
+   "rigid_body": "present",
+   "mass": "present",
+   "friction": "present (surface/friction)",
+   "joints": "not_applicable",
+   "semantic_labels": "missing",
+   "validation_profile": null,
+   "validation_status": "not_run (no gz/ros2/px4 on this host)",
+   "plugin_class": "visual_or_inertial_only"
+  },
+  "status": "approved"
+ },
+ {
+  "asset_id": "x500",
+  "display_name": "x500",
+  "source": {
+   "library": "px4-gazebo-models",
+   "page_url": "https://github.com/PX4/PX4-gazebo-models/tree/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500",
+   "repository_or_dataset": "PX4/PX4-gazebo-models",
+   "revision_or_version": "e5997f455e33ec071c7c677fc59a65781de496a4",
+   "source_asset_id": "x500"
+  },
+  "retrieved_at": "2026-11-12T07:38:11Z",
+  "license": {
+   "status": "approved",
+   "spdx": "BSD-3-Clause",
+   "source_text": "BSD 3-Clause License\n\nCopyright (c) 2022, Rudis Laboratories\nAll rights reserved.\n\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are met:\n\n1. Redistributions of source code must retain the above copyright notice, this\n   list of conditions and the following disclaimer.\n\n2. Redistributions in binary form must re",
+   "commercial_use": "allowed",
+   "attribution_required": true,
+   "manual_review": true,
+   "license_file": "LICENSE",
+   "license_file_sha256": "cee4ef94e73cd38fb2886f5d7e7a04d6488f54b1e70cd8b1b29d74f38bfdba5b",
+   "source": "PX4-gazebo-models per-model LICENSE file"
+  },
+  "formats": [
+   "sdf",
+   "dae",
+   "stl",
+   "png"
+  ],
+  "runtime": [
+   "gazebo_sim_gz"
+  ],
+  "units": "meters (SDF default)",
+  "up_axis": "Z",
+  "simulation": {
+   "collision": "missing",
+   "rigid_body": "missing",
+   "mass": "missing",
+   "friction": "unknown",
+   "joints": "not_applicable",
+   "semantic_labels": "missing",
+   "validation_profile": null,
+   "validation_status": "not_run (no gz/ros2/px4 on this host)",
+   "plugin_class": "gazebo_sim_gz"
+  },
+  "status": "approved"
+ },
+ {
+  "asset_id": "x500_base",
+  "display_name": "x500_base",
+  "source": {
+   "library": "px4-gazebo-models",
+   "page_url": "https://github.com/PX4/PX4-gazebo-models/tree/e5997f455e33ec071c7c677fc59a65781de496a4/models/x500_base",
+   "repository_or_dataset": "PX4/PX4-gazebo-models",
+   "revision_or_version": "e5997f455e33ec071c7c677fc59a65781de496a4",
+   "source_asset_id": "x500_base"
+  },
+  "retrieved_at": "2026-11-12T07:38:11Z",
+  "license": {
+   "status": "approved",
+   "spdx": "BSD-3-Clause",
+   "source_text": "BSD 3-Clause License\n\nCopyright (c) 2022, Rudis Laboratories\nAll rights reserved.\n\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are met:\n\n1. Redistributions of source code must retain the above copyright notice, this\n   list of conditions and the following disclaimer.\n\n2. Redistributions in binary form must re",
+   "commercial_use": "allowed",
+   "attribution_required": true,
+   "manual_review": true,
+   "license_file": "LICENSE",
+   "license_file_sha256": "cee4ef94e73cd38fb2886f5d7e7a04d6488f54b1e70cd8b1b29d74f38bfdba5b",
+   "source": "PX4-gazebo-models per-model LICENSE file"
+  },
+  "formats": [
+   "sdf",
+   "dae",
+   "stl",
+   "png"
+  ],
+  "runtime": [
+   "gazebo_sim_gz"
+  ],
+  "units": "meters (SDF default)",
+  "up_axis": "Z",
+  "simulation": {
+   "collision": "present",
+   "rigid_body": "present",
+   "mass": "present",
+   "friction": "present (surface/friction)",
+   "joints": "present",
+   "semantic_labels": "missing",
+   "validation_profile": null,
+   "validation_status": "not_run (no gz/ros2/px4 on this host)",
+   "plugin_class": "visual_or_inertial_only"
+  },
+  "status": "approved"
+ }
+]
