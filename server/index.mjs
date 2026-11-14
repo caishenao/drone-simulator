@@ -10,6 +10,8 @@
 // 启动：node server/index.mjs（MP_HOST / MP_PORT / MP_ORIGINS / MP_ORIGIN_LON / MP_ORIGIN_LAT / MP_ORIGIN_NAME 可覆盖）。
 import { Server } from 'socket.io'
 import http from 'node:http'
+import fs from 'node:fs'
+import path from 'node:path'
 
 // 环境变量：默认只绑本机、只放行本地 dev/preview 源；局域网联机设 MP_HOST=0.0.0.0。
 const HOST = process.env.MP_HOST || '127.0.0.1'
@@ -206,6 +208,77 @@ setInterval(() => {
     }
   }
 }, SWEEP_INTERVAL_MS)
+
+// —— 同源静态托管（Docker 单端口部署）——
+// MP_STATIC_DIR 指向前端构建产物（web/dist）：页面、Cesium UMD、机体 GLB 与
+// Socket.IO 走同一个端口，浏览器同源直连，无需再配 CORS 与独立 MP 地址。
+// 不设 MP_STATIC_DIR 时行为与原来完全一致（纯中继，配合 vite dev 使用）。
+const STATIC_DIR = process.env.MP_STATIC_DIR || ''
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.map': 'application/json',
+  '.glb': 'model/gltf-binary',
+  '.gltf': 'model/gltf+json',
+  '.bin': 'application/octet-stream',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.wasm': 'application/wasm',
+  '.woff2': 'font/woff2',
+  '.geojson': 'application/geo+json',
+  '.ktx2': 'image/ktx2',
+}
+if (STATIC_DIR) {
+  const root = path.resolve(STATIC_DIR)
+  httpServer.on('request', (req, res) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      res.writeHead(405).end()
+      return
+    }
+    // URL 解码后规范化并限死在产物目录内：防路径穿越
+    let urlPath = decodeURIComponent((req.url ?? '/').split('?')[0])
+    if (urlPath.endsWith('/')) urlPath += 'index.html'
+    const file = path.resolve(root, '.' + urlPath)
+    if (file !== root && !file.startsWith(root + path.sep)) {
+      res.writeHead(403).end()
+      return
+    }
+    fs.stat(file, (err, st) => {
+      if (err || !st.isFile()) {
+        // SPA 兜底：hash 路由其实用不到，保底给 index.html 而不是 404
+        const index = path.join(root, 'index.html')
+        fs.readFile(index, (e2, buf) => {
+          if (e2) {
+            res.writeHead(404).end()
+            return
+          }
+          res.writeHead(200, { 'content-type': MIME['.html'], 'cache-control': 'no-cache' })
+          res.end(req.method === 'HEAD' ? undefined : buf)
+        })
+        return
+      }
+      const type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream'
+      // 带内容指纹的资产长缓存；index.html 不缓存（发版即时生效）
+      const immutable = /-[A-Za-z0-9_-]{8,}\.[a-z]+$/.test(file)
+      res.writeHead(200, {
+        'content-type': type,
+        'content-length': st.size,
+        'cache-control': immutable ? 'public, max-age=31536000, immutable' : 'no-cache',
+      })
+      if (req.method === 'HEAD') {
+        res.end()
+        return
+      }
+      fs.createReadStream(file).pipe(res)
+    })
+  })
+  console.log(`[mp] 同源静态托管已开启: ${root}`)
+}
 
 httpServer.listen(PORT, HOST, () => {
   console.log(

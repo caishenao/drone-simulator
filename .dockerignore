@@ -1,0 +1,26 @@
+# 构建上下文瘦身：3.4MB 源码之外的东西一律不进 daemon
+.git
+node_modules
+**/node_modules
+web/dist
+# Cesium UMD / 机体 GLB 由 npm run assets 在镜像内重建
+web/public/cesium
+web/public/models
+# 模型源文件（.blend）：镜像里只用导出的 .glb
+*.blend
+# 自检脚本与截图、外部大文件
+web/shots
+check_*.png
+vendor/cesium
+sim_px4/raw
+sim_px4/normalized
+# 本地密钥
+.env.local
+.env.*.local
+*.pem
+*.key
+# 其他
+*.log
+.workbuddy
+docs
+examples

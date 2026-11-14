@@ -63,7 +63,7 @@ function onChatKey(e: KeyboardEvent) {
     <template v-if="sim.mp.status === 'idle' || sim.mp.status === 'connecting'">
       <label class="frow">
         <span>服务器</span>
-        <input v-model="serverUrl" type="text" spellcheck="false" placeholder="http://127.0.0.1:5190" />
+        <input v-model="serverUrl" type="text" spellcheck="false" placeholder="留空 = 本站同源" />
       </label>
       <label class="frow">
         <span>名称</span>

@@ -5,9 +5,12 @@ import type { MpChatMsg, MpPlayer, Snapshot } from './snapshot'
 
 export type MpStatus = 'idle' | 'connecting' | 'joined' | 'reconnecting'
 
-/** 默认服务器地址：.env.local 里 VITE_MP_URL 可覆盖 */
+/** 默认服务器地址：.env.local 里 VITE_MP_URL 可覆盖。
+ *  dev 缺省 http://127.0.0.1:5190（与 vite dev server 并存）；
+ *  生产构建缺省空串 = 同源直连（Docker 单端口部署：静态页与 Socket.IO 同端口）。 */
 export const DEFAULT_MP_URL =
-  (import.meta.env?.VITE_MP_URL as string | undefined) || 'http://127.0.0.1:5190'
+  (import.meta.env?.VITE_MP_URL as string | undefined) ||
+  (import.meta.env?.DEV ? 'http://127.0.0.1:5190' : '')
 
 export interface MpOrigin {
   lon: number
@@ -58,12 +61,12 @@ export class MultiplayerClient {
     return !!this.socket?.connected
   }
 
-  /** 建立连接（幂等）：只连不加，加入由 join() 负责 */
+  /** 建立连接（幂等）：只连不加，加入由 join() 负责。url 为空串 = 同源直连 */
   connect(url: string): void {
     if (this.socket) return
     this.status = 'connecting'
     this.handlers.onTransport('connecting')
-    this.socket = io(url, {
+    this.socket = io(url || undefined, {
       transports: ['websocket'],
       reconnection: true,
       reconnectionDelay: 800,
