@@ -52,7 +52,10 @@ const mpChip = computed(() => {
         <span class="pulse" />
         <div class="titles">
           <strong>无人机模拟器</strong>
-          <small>{{ sim.takeoff.place.name }} · 3D 建筑 {{ sim.takeoff.buildings }} 栋</small>
+          <small>
+            {{ sim.mp.selfName ? `ID ${sim.mp.selfName} · ` : '' }}{{ sim.takeoff.place.name }} · 3D 建筑
+            {{ sim.takeoff.buildings }} 栋
+          </small>
         </div>
       </div>
       <div class="status">
@@ -106,7 +109,7 @@ const mpChip = computed(() => {
     </header>
 
     <aside class="sidebar" :class="{ closed: !sim.ui.panelOpen }">
-      <MultiplayerPanel :sim="sim" />
+      <MultiplayerPanel :sim="sim" @configure="emit('configure')" />
       <TakeoffPanel :sim="sim" />
       <ControlPanel :sim="sim" />
     </aside>

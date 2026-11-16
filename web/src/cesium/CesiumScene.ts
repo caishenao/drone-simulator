@@ -342,7 +342,9 @@ export class CesiumScene {
     // 关掉 FXAA：它会把小尺寸机体/桨叶糊成一团（MSAA 4x 仍在，边缘不会锯齿）
     scene.postProcessStages.fxaa.enabled = false
     scene.screenSpaceCameraController.minimumZoomDistance = 1.5
-    scene.screenSpaceCameraController.maximumZoomDistance = 40_000
+    // 配置页要能一路滚轮缩到地球全景（40 km 只够看城市）。
+    // 地球半径约 6.37e6 m，2.5e7 m 约等于 4 个地球直径，足够看到完整球体。
+    scene.screenSpaceCameraController.maximumZoomDistance = 25_000_000
     this.viewer.cesiumWidget.creditContainer.parentElement?.classList.add('cesium-credits')
 
     this.viewer.scene.primitives.add(this.trail)

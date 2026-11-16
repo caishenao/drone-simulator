@@ -3,7 +3,7 @@
 //
 // 左侧是「怎么飞」，右下是「从哪飞」，中间的三维地球既是预览也是选点工具：
 // 直接点地球任意位置即可把那里设为起飞点。
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import type { DroneSim } from '../composables/useDroneSim'
 import { DRONE_TYPES, getDroneType } from '../config/droneTypes'
 import { TRAIL_COLORS, flightConfig, resetFlightConfig } from '../config/flightConfig'
@@ -11,7 +11,7 @@ import { parseLatLon, type Place } from '../geo/locate'
 import type { FollowMode } from '../cesium/CesiumScene'
 
 const props = defineProps<{ sim: DroneSim; ready?: boolean }>()
-const emit = defineEmits<{ start: []; back: [] }>()
+const emit = defineEmits<{ start: [payload: { droneId: string; serverUrl: string }]; back: [] }>()
 
 const query = ref('')
 const searching = ref(false)
@@ -20,6 +20,14 @@ const searched = ref(false)
 const coordText = ref('')
 const coordError = ref('')
 const showPresets = ref(false)
+
+/** 开始飞行前的无人机 ID 弹框：确认前不切页、不动地球 */
+const showIdDialog = ref(false)
+const droneIdInput = ref(localStorage.getItem('drone-mp-name') || '')
+const serverUrlInput = ref(localStorage.getItem('drone-mp-url') || props.sim.mp.url)
+const idError = ref('')
+const joining = ref(false)
+const idInputEl = ref<HTMLInputElement | null>(null)
 
 const FOLLOW_OPTIONS: { key: FollowMode; label: string; desc: string }[] = [
   { key: 'chase', label: '追尾镜头', desc: '跟在机尾后方，最适合看姿态与高度' },
@@ -138,6 +146,56 @@ async function applyCoord() {
   }
   coordText.value = ''
   await props.sim.pickPreview(p.lon, p.lat)
+}
+
+/** 点「开始飞行」：先弹 ID 框，确认前仍然停在配置页 */
+function requestStart() {
+  if (busy.value || !props.ready || showIdDialog.value) return
+  droneIdInput.value = localStorage.getItem('drone-mp-name') || ''
+  serverUrlInput.value = localStorage.getItem('drone-mp-url') || props.sim.mp.url
+  idError.value = ''
+  showIdDialog.value = true
+  void nextTick(() => idInputEl.value?.focus())
+}
+
+function cancelStart() {
+  showIdDialog.value = false
+  idError.value = ''
+  // 连接中取消：把半途的 socket / 面板状态收干净，回到纯单机选点
+  if (props.sim.mp.joining || props.sim.mp.status === 'connecting') void props.sim.mpLeave(true)
+}
+
+async function confirmStart() {
+  if (joining.value) return
+  const id = droneIdInput.value.trim()
+  if (!id) {
+    idError.value = '请输入无人机 ID'
+    void nextTick(() => idInputEl.value?.focus())
+    return
+  }
+  const serverUrl = serverUrlInput.value.trim()
+  const droneId = id.slice(0, 16)
+  const place = props.sim.takeoff.place
+  joining.value = true
+  idError.value = ''
+  try {
+    // 先把当前地图选点作为空域原点提交；首个玩家的原点即全服原点，加入成功后才起飞
+    const ok = await props.sim.mpJoin(droneId, serverUrl, {
+      lon: place.lon,
+      lat: place.lat,
+      placeName: place.name,
+    })
+    if (!ok) {
+      idError.value = props.sim.mp.error || '加入空域失败，请检查服务器地址或换一个 ID'
+      return
+    }
+    localStorage.setItem('drone-mp-name', droneId)
+    localStorage.setItem('drone-mp-url', serverUrl)
+    showIdDialog.value = false
+    emit('start', { droneId, serverUrl })
+  } finally {
+    joining.value = false
+  }
 }
 </script>
 
@@ -307,7 +365,7 @@ async function applyCoord() {
         <p v-if="coordError" class="pl-err">{{ coordError }}</p>
       </details>
 
-      <button class="launch" :disabled="busy || !ready" @click="emit('start')">
+      <button class="launch" :disabled="busy || !ready" @click="requestStart">
         <span>{{ ready ? '开始飞行' : '三维地球加载中…' }}</span>
         <em>{{ drone.name }} · {{ flightConfig.followMode === 'fpv' ? '云台第一视角' : flightConfig.followMode === 'world' ? '固定方位' : '追尾镜头' }}</em>
       </button>
@@ -318,8 +376,53 @@ async function applyCoord() {
 
     <div class="maphint">
       <span class="pin">◎</span>
-      <span>点击三维地球任意位置设为起飞点 · 左键拖动可环绕 · 滚轮缩放</span>
+      <span>点击三维地球任意位置设为起飞点 · 左键拖动可环绕 · 滚轮缩放（可拉远至全球）</span>
     </div>
+
+    <!-- 无人机 ID / 空域名称：起飞前确认，取消时地球与选点原样保留 -->
+    <Transition name="modal">
+      <div v-if="showIdDialog" class="modal-mask" @click.self="cancelStart">
+        <div class="id-dialog" role="dialog" aria-modal="true" aria-labelledby="id-title">
+          <div class="id-icon">ID</div>
+          <h2 id="id-title">输入无人机 ID</h2>
+          <p class="id-desc">
+            作为你在全球空域里的唯一名称。确认后从当前选点
+            <b>{{ sim.takeoff.place.name }}</b> 起飞；你是首个加入者时，这个点就是全服空域原点。
+          </p>
+          <form @submit.prevent="confirmStart">
+            <label for="drone-id">无人机 ID</label>
+            <input
+              id="drone-id"
+              ref="idInputEl"
+              v-model="droneIdInput"
+              type="text"
+              maxlength="16"
+              placeholder="例如：MINI3-001"
+              autocomplete="off"
+              spellcheck="false"
+              @keydown.esc.prevent="cancelStart"
+            />
+            <label class="server-label" for="mp-url">服务器（留空 = 同源）</label>
+            <input
+              id="mp-url"
+              v-model="serverUrlInput"
+              type="text"
+              placeholder="http://127.0.0.1:5190"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <p v-if="idError" class="id-err">{{ idError }}</p>
+            <p class="id-note">名称全局唯一，重名会被服务器拒绝；加入状态在飞行页侧栏查看。</p>
+            <div class="id-actions">
+              <button type="button" class="ghost" :disabled="joining" @click="cancelStart">返回选点</button>
+              <button type="submit" class="confirm" :disabled="joining">
+                {{ joining ? '连接中…' : '加入空域并开始飞行' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -822,6 +925,124 @@ button:disabled {
 }
 .maphint .pin {
   color: #7fe0ff;
+}
+
+/* —— 无人机 ID 弹框 —— */
+.modal-mask {
+  pointer-events: auto;
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(3, 10, 16, 0.68);
+  backdrop-filter: blur(4px);
+}
+.id-dialog {
+  width: min(420px, 100%);
+  padding: 24px 26px 22px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(13, 30, 44, 0.98), rgba(8, 19, 29, 0.98));
+  border: 1px solid rgba(120, 200, 250, 0.42);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.62);
+}
+.id-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  color: #04131d;
+  background: linear-gradient(180deg, #7fe0ff, #35a9e0);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.id-dialog h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  color: #f1f8ff;
+}
+.id-desc {
+  margin: 0 0 18px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #9ab8cd;
+}
+.id-desc b {
+  color: #8fe6ff;
+  font-weight: 600;
+}
+.id-dialog label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #7fb4d8;
+}
+.id-dialog label.server-label {
+  margin-top: 12px;
+}
+.id-dialog input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #eaf6ff;
+  background: rgba(14, 30, 44, 0.9);
+  border: 1px solid rgba(110, 170, 215, 0.4);
+  border-radius: 8px;
+  outline: none;
+}
+.id-dialog input:focus {
+  border-color: #8fe6ff;
+  box-shadow: 0 0 0 3px rgba(87, 200, 255, 0.14);
+}
+.id-err {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: #ffb08a;
+}
+.id-note {
+  margin: 10px 0 0;
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: #6f8ba1;
+}
+.id-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+}
+.id-actions button {
+  flex: 1 1 auto;
+  padding: 10px 12px !important;
+  font-family: inherit;
+  font-size: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.id-actions .ghost {
+  color: #9ab8cd !important;
+  background: rgba(28, 54, 76, 0.6) !important;
+  border: 1px solid rgba(110, 170, 215, 0.32) !important;
+}
+.id-actions .confirm {
+  color: #04131d !important;
+  background: linear-gradient(180deg, #7fe0ff, #35a9e0) !important;
+  border-color: #8fe6ff !important;
+  font-weight: 600;
+}
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.18s ease;
+}
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
 }
 @media (max-width: 1080px) {
   .panel {

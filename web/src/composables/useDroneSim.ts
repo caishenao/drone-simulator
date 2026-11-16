@@ -15,7 +15,12 @@ import {
   searchPlace,
   type Place,
 } from '../geo/locate'
-import { MultiplayerClient, DEFAULT_MP_URL, type MpStatus } from '../net/MultiplayerClient'
+import {
+  MultiplayerClient,
+  DEFAULT_MP_URL,
+  type MpOrigin,
+  type MpStatus,
+} from '../net/MultiplayerClient'
 import { RemoteDrones } from '../net/RemoteDrones'
 import { buildSnapshot, type MpChatMsg, type MpPlayer } from '../net/snapshot'
 
@@ -127,6 +132,8 @@ export interface MpState {
   /** 服务器地址（首次 join 后锁定） */
   url: string
   selfId: string
+  /** 起飞前弹框输入的无人机 ID（服务器确认后回写） */
+  selfName: string
   selfColor: string
   players: MpPlayer[]
   chat: MpChatMsg[]
@@ -238,6 +245,7 @@ export function useDroneSim() {
     status: 'idle',
     url: DEFAULT_MP_URL,
     selfId: '',
+    selfName: '',
     selfColor: '#5ad1ff',
     players: [],
     chat: [],
@@ -267,6 +275,7 @@ export function useDroneSim() {
     onJoined: (self, origin, roster) => {
       mp.status = 'joined'
       mp.selfId = self.id
+      mp.selfName = self.name
       mp.selfColor = self.color
       mp.worldOrigin = origin
       mp.players = [...roster]
@@ -1126,10 +1135,11 @@ export function useDroneSim() {
   /**
    * 进入全球空域（唯一空域，无房间概念）。流程：
    * 1. 连接服务器，以无人机名称加入（服务器全局查重，重名拒绝）；
-   * 2. 确认后把场景原点搬到「空域原点」（全服共享一套 ENU 坐标，方案第 5 节）；
-   * 3. 建远端机体管理器，会话就绪（mpReady）。
+   * 2. 首个玩家把起飞前地图选好的点作为空域原点提交，后来者同步服务器返回的原点；
+   * 3. 确认后把场景原点对齐到空域原点（全服共享一套 ENU 坐标，方案第 5 节）；
+   * 4. 建远端机体管理器，会话就绪（mpReady）。
    */
-  async function mpJoin(name: string, url?: string): Promise<boolean> {
+  async function mpJoin(name: string, url?: string, origin?: MpOrigin): Promise<boolean> {
     const s = scene.value
     if (!s) return false
     if (mp.joining) return false
@@ -1140,7 +1150,7 @@ export function useDroneSim() {
     mp.url = url || mp.url || DEFAULT_MP_URL
     try {
       // ack 自带 self/origin/players：不依赖 mp:joined 事件的到达时序（两包可能分批）
-      const result = await client.join({ name, droneTypeId: ui.droneTypeId })
+      const result = await client.join({ name, droneTypeId: ui.droneTypeId, origin })
       if (!result) {
         // 拒绝原因已由 onError 写进 mp.error（重名 / 空域满）
         mp.joining = false
@@ -1217,6 +1227,8 @@ export function useDroneSim() {
       mpPublishTimer = 0
     }
     mp.status = 'idle'
+    mp.selfId = ''
+    mp.selfName = ''
     mp.players = []
     mp.worldOrigin = null
     mp.note = ''

@@ -22,6 +22,8 @@ export interface JoinPayload {
   /** 无人机唯一名称（服务器全局查重，重名拒绝） */
   name: string
   droneTypeId: string
+  /** 首个玩家带来的起飞点；服务器只在空场时采纳，后来者同步既有原点 */
+  origin?: MpOrigin
 }
 
 export interface JoinResult {

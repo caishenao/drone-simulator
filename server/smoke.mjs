@@ -15,10 +15,10 @@ function connect() {
   return io(URL, { transports: ['websocket'], extraHeaders: { origin: 'http://127.0.0.1:5188' } })
 }
 
-function join(socket, name, droneTypeId = 'mini3pro') {
+function join(socket, name, droneTypeId = 'mini3pro', origin) {
   return new Promise((resolve, reject) => {
     const t = setTimeout(() => reject(new Error('mp:join ack 超时')), 3000)
-    socket.emit('mp:join', { name, droneTypeId }, (res) => {
+    socket.emit('mp:join', { name, droneTypeId, origin }, (res) => {
       clearTimeout(t)
       resolve(res)
     })
@@ -56,15 +56,29 @@ const b = connect()
 
 try {
   // 1. A 进入空域
-  const joinA = await join(a, '试飞A')
+  const originA = { lon: 121.4737, lat: 31.2304, placeName: '上海 · 外滩' }
+  const joinA = await join(a, '试飞A', 'mini3pro', originA)
   check('A 进入成功', joinA?.ok === true)
-  check('返回空域原点（服务器统一规定）', joinA?.origin?.lon === 116.4602 && joinA?.origin?.placeName === '北京国贸')
+  check(
+    '首个玩家用地图选点作为空域原点（不回北京）',
+    joinA?.origin?.lon === originA.lon &&
+      joinA?.origin?.lat === originA.lat &&
+      joinA?.origin?.placeName === originA.placeName,
+  )
   check('名单含自己且带颜色', joinA?.players?.length === 1 && joinA?.players?.[0]?.color?.startsWith('#'))
 
   // 2. B 进入 → A 收到 player-joined
   const aSeesB = once(a, 'mp:player-joined')
-  const joinB = await join(b, '试飞B')
+  const joinB = await join(b, '试飞B', 'mini3pro', {
+    lon: 116.4602,
+    lat: 39.9026,
+    placeName: '北京国贸',
+  })
   check('B 进入成功且名单 2 人', joinB?.ok === true && joinB?.players?.length === 2)
+  check(
+    '后来者同步首个玩家的原点（不能各自搬点）',
+    joinB?.origin?.lon === originA.lon && joinB?.origin?.placeName === originA.placeName,
+  )
   const seenB = (await aSeesB).player
   check('A 收到 B 的 player-joined', seenB?.name === '试飞B')
 

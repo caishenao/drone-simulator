@@ -1,22 +1,15 @@
 <script setup lang="ts">
 // 多人联机面板：进入全球空域（全世界一张地图，无房间概念）、在线名单、文字聊天。
 // 规则：无人机名称全局唯一（重名拒绝）；关闭页面即自动退出。
-// 状态全部来自 sim.mp（useDroneSim 维护），本组件只做表单与展示。
+// ID 输入已前移到配置页「开始飞行」弹框；本组件只展示状态、名单与聊天。
 import { nextTick, ref, watch } from 'vue'
 import type { DroneSim } from '../composables/useDroneSim'
 
 const props = defineProps<{ sim: DroneSim }>()
+const emit = defineEmits<{ configure: [] }>()
 
-const STORE_NAME = 'drone-mp-name'
-const STORE_URL = 'drone-mp-url'
-
-const serverUrl = ref(localStorage.getItem(STORE_URL) || props.sim.mp.url)
-const nickname = ref(localStorage.getItem(STORE_NAME) || '')
 const chatText = ref('')
 const chatBox = ref<HTMLDivElement | null>(null)
-
-watch(nickname, (v) => localStorage.setItem(STORE_NAME, v))
-watch(serverUrl, (v) => localStorage.setItem(STORE_URL, v))
 
 /** 聊天流自动滚底：有新消息就滚到底 */
 watch(
@@ -27,12 +20,6 @@ watch(
     if (el) el.scrollTop = el.scrollHeight
   },
 )
-
-function join() {
-  // 名称必填：它是玩家在空域里的唯一身份标识
-  if (!nickname.value.trim() || props.sim.mp.joining) return
-  void props.sim.mpJoin(nickname.value.trim(), serverUrl.value.trim())
-}
 
 function leave() {
   void props.sim.mpLeave()
@@ -59,31 +46,19 @@ function onChatKey(e: KeyboardEvent) {
   <section class="panel mp">
     <h2>全球空域</h2>
 
-    <!-- 未进入：表单 -->
+    <!-- 未进入：ID 已在起飞前弹框输入，这里只留状态与返回入口 -->
     <template v-if="sim.mp.status === 'idle' || sim.mp.status === 'connecting'">
-      <label class="frow">
-        <span>服务器</span>
-        <input v-model="serverUrl" type="text" spellcheck="false" placeholder="留空 = 本站同源" />
-      </label>
-      <label class="frow">
-        <span>名称</span>
-        <input
-          v-model="nickname"
-          type="text"
-          maxlength="16"
-          placeholder="给无人机起一个唯一名称"
-          @keydown.enter="join"
-        />
-      </label>
-      <button class="join" :disabled="sim.mp.joining || !nickname.trim()" @click="join">
-        {{ sim.mp.joining ? '连接中…' : '进入全球空域' }}
-      </button>
+      <p class="preflight">
+        {{ sim.mp.joining || sim.mp.status === 'connecting'
+          ? '正在按起飞前输入的无人机 ID 加入空域…'
+          : '尚未加入空域。返回配置页点「开始飞行」，在弹框里输入无人机 ID。' }}
+      </p>
       <p v-if="sim.mp.error" class="hint err">{{ sim.mp.error }}</p>
       <p class="hint">
-        全世界共用一张地图：没有房间，进入后自动移动到空域统一起飞点。
+        全世界共用一张地图：首个加入者以自己地图上的选点作为空域原点，后来者同步到该点。
         无人机名称全局唯一，重复会被拒绝；关闭页面即自动退出。
-        本机联调直接用默认地址；局域网联机请在服务器端设 <code>MP_HOST=0.0.0.0</code>。
       </p>
+      <button class="join" @click="emit('configure')">返回配置页输入 ID</button>
     </template>
 
     <!-- 进入中 / 已进入：空域视图 -->
@@ -156,8 +131,19 @@ function onChatKey(e: KeyboardEvent) {
 .chatin input::placeholder {
   color: #51708a;
 }
+.preflight {
+  margin: 0;
+  padding: 9px 11px;
+  border-radius: 7px;
+  background: rgba(20, 42, 60, 0.7);
+  border: 1px solid rgba(110, 170, 215, 0.2);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: #b9d3e6;
+}
 .join {
   width: 100%;
+  margin-top: 8px;
   padding: 8px 10px;
   font-size: 13px;
   font-weight: 600;

@@ -82,6 +82,12 @@ function onReady(next: CesiumScene, stats: { buildings: number }) {
     buildings: sim.takeoff.buildings,
     tele: { ...sim.tele },
     ui: { ...sim.ui },
+    mp: {
+      status: sim.mp.status,
+      selfName: sim.mp.selfName,
+      worldOrigin: sim.mp.worldOrigin ? { ...sim.mp.worldOrigin } : null,
+      players: sim.mp.players.length,
+    },
     crash: { ...sim.crash },
     takeoff: { ...sim.takeoff, place: { ...sim.takeoff.place } },
     scene: next.debugSnapshot(),

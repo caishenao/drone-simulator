@@ -5,6 +5,7 @@
 //
 // 注意：无头 swiftshader 下不能按墙钟等待 —— 软件渲染一帧要几百毫秒，
 // 仿真时间推进比真实时间慢得多，所有等待都按仿真时间 / 状态标志来卡。
+import { spawn } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, resolve } from 'node:path'
@@ -21,11 +22,40 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 const OUT = resolve(HERE, '..', 'shots')
 mkdirSync(OUT, { recursive: true })
 
+// 起飞弹框会真实加入空域：自检前拉起本地服务器，结束时关掉。
+let mpServer = null
+async function ensureMpServer() {
+  const health = 'http://127.0.0.1:5190/healthz'
+  try {
+    const r = await fetch(health, { signal: AbortSignal.timeout(1000) })
+    if (r.ok) return
+  } catch {
+    // 下面拉起
+  }
+  mpServer = spawn(process.execPath, ['index.mjs'], {
+    cwd: resolve(HERE, '..', '..', 'server'),
+    env: { ...process.env, MP_HOST: '127.0.0.1', MP_PORT: '5190' },
+    stdio: 'ignore',
+  })
+  for (let i = 0; i < 40; i++) {
+    try {
+      const r = await fetch(health, { signal: AbortSignal.timeout(1000) })
+      if (r.ok) return
+    } catch {
+      // 继续等
+    }
+    await new Promise((r) => setTimeout(r, 250))
+  }
+  throw new Error('联机服务器未能启动')
+}
+
 const checks = []
 function ck(name, ok, detail = '') {
   checks.push({ name, ok: !!ok, detail: String(detail) })
   console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ' — ' + detail : ''}`)
 }
+
+await ensureMpServer()
 
 const browser = await chromium.launch({
   executablePath: CHROME,
@@ -137,27 +167,72 @@ ck('轨迹显示可恢复', trailOn === true, `trail=${trailOn}`)
 // ————————————————————————————————————————————
 const picked = await page.evaluate(async () => {
   const ok = await window.__droneSim.previewPlace({
-    lon: 116.4602,
-    lat: 39.9026,
-    name: '北京 · 国贸',
-    source: 'preset',
+    lon: 121.4737,
+    lat: 31.2304,
+    name: '上海 · 外滩',
+    source: 'search',
   })
   const d = window.__droneDebug()
   return { ok, origin: d.scene.origin, place: d.takeoff.place.name }
 })
 ck('配置页可预览起飞点', picked.ok === true, JSON.stringify(picked.origin))
-ck('场景原点跟随选点', Math.abs(picked.origin[0] - 116.4602) < 1e-3, `${picked.origin}`)
+ck('场景原点跟随选点（非默认北京）', Math.abs(picked.origin[0] - 121.4737) < 1e-3, `${picked.origin}`)
+
+const maxZoom = await page.evaluate(
+  () => window.__scene.viewer.scene.screenSpaceCameraController.maximumZoomDistance,
+)
+ck('相机允许缩小到全球视角', maxZoom >= 12_000_000, `${maxZoom} m`)
 
 // ————————————————————————————————————————————
-// 6. 开始飞行：镜头过渡 + 物理循环
+// 6. 开始飞行：ID 弹框 → 加入空域 → 镜头过渡 + 物理循环
 // ————————————————————————————————————————————
 const camBefore = await page.evaluate(() => {
   const c = window.__scene.viewer.camera
   return { h: c.height, len: c.positionCartographic.height }
 })
 await page.locator('.place .launch').click()
-await page.waitForFunction(() => location.hash.includes('flight'), null, { timeout: 30_000 })
-ck('开始飞行后进入飞行页', page.url().includes('#/flight'), page.url())
+await page.waitForSelector('.id-dialog input#drone-id', { timeout: 10_000 })
+const dialogState = await page.evaluate(() => ({
+  stage: window.__droneDebug().stage,
+  origin: window.__droneDebug().scene.origin,
+}))
+ck('开始飞行先弹无人机 ID 弹框', true)
+ck(
+  '弹框打开时仍停在配置页且起飞点不变',
+  dialogState.stage === 'config' && Math.abs(dialogState.origin[0] - 121.4737) < 1e-3,
+  JSON.stringify(dialogState),
+)
+
+// 取消再重开：确认前不应该切页 / 改场景
+await page.locator('.id-dialog .ghost').click()
+await page.waitForSelector('.id-dialog', { state: 'detached', timeout: 10_000 })
+await page.locator('.place .launch').click()
+await page.locator('#drone-id').fill('DRONE-007')
+await page.locator('.id-dialog .confirm').click()
+await page.waitForFunction(() => location.hash.includes('flight'), null, { timeout: 40_000 })
+ck('输入无人机 ID 并加入空域后进入飞行页', page.url().includes('#/flight'), page.url())
+
+const joined = await page.evaluate(() => {
+  const d = window.__droneDebug()
+  return {
+    name: d.mp.selfName,
+    mpStatus: d.mp.status,
+    worldOrigin: d.mp.worldOrigin,
+    origin: d.scene.origin,
+    place: d.takeoff.place.name,
+  }
+})
+ck('无人机 ID 写入空域状态', joined.name === 'DRONE-007' && joined.mpStatus === 'joined', `${joined.name} / ${joined.mpStatus}`)
+ck(
+  '服务器空域原点等于地图上选的点',
+  joined.worldOrigin?.lon === 121.4737 && joined.worldOrigin?.placeName === '上海 · 外滩',
+  JSON.stringify(joined.worldOrigin),
+)
+ck(
+  '加入后保持已选起飞点（不回北京）',
+  Math.abs(joined.origin[0] - 121.4737) < 1e-3 && joined.place === '上海 · 外滩',
+  `${joined.place} @ ${joined.origin}`,
+)
 
 // 过渡动画需要真实帧推进，等仿真时间走起来再判断镜头
 await page.waitForFunction(() => window.__droneDebug().tele.time > 0.5, null, { timeout: 60_000 })
@@ -201,9 +276,21 @@ await page.waitForFunction(() => window.__droneDebug().scene.inputs === true, nu
 })
 const back = await page.evaluate(() => {
   const d = window.__droneDebug()
-  return { stage: d.stage, follow: d.scene.follow, inputs: d.scene.inputs, time: d.tele.time }
+  return {
+    stage: d.stage,
+    follow: d.scene.follow,
+    inputs: d.scene.inputs,
+    time: d.tele.time,
+    origin: d.scene.origin,
+    place: d.takeoff.place.name,
+  }
 })
 ck('可从飞行页回到配置页', back.stage === 'config', back.stage)
+ck(
+  '回配置页后选点仍是上海（未回北京）',
+  Math.abs(back.origin[0] - 121.4737) < 1e-3 && back.place === '上海 · 外滩',
+  `${back.place} @ ${back.origin}`,
+)
 ck(
   '回到配置页后镜头交回自由视角（可拖动地球）',
   back.follow === 'free' && back.inputs === true,
@@ -225,4 +312,5 @@ writeFileSync(
 const pass = checks.filter((c) => c.ok).length
 console.log(`\n${pass}/${checks.length} 通过`)
 await browser.close()
+mpServer?.kill()
 process.exit(pass === checks.length ? 0 : 1)

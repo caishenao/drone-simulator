@@ -3,7 +3,8 @@
 // 定位见 docs/multiplayer-plan.md：
 //   · 全世界共用一张地图：没有房间概念，所有接入的玩家都在同一个空域、同一套坐标系里；
 //   · 物理在客户端本地跑（客户端权威），服务器不理解飞行状态，只做在线名单与转发；
-//   · 空域起飞原点由服务器统一规定（MP_ORIGIN_* 可配），玩家进入时自行把场景搬过去；
+//   · 空域起飞原点由首个加入的玩家决定（携带自己地图选点），后续玩家同步到同一原点；
+//     无人在线时回到 MP_ORIGIN_* 配置的默认值；
 //   · 玩家名称全局唯一（大小写不敏感），重名直接拒绝；
 //   · 连接即在场：断开连接（含关闭浏览器页面）立即从空域移除，无持久化。
 //
@@ -25,12 +26,14 @@ const ORIGINS = (process.env.MP_ORIGINS || 'http://127.0.0.1:5188,http://localho
   .map((s) => s.trim())
   .filter(Boolean)
 
-// 空域起飞原点：全服唯一，所有人进入后自动搬到这一点上，共享同一套本地 ENU 坐标。
-const WORLD_ORIGIN = {
+// 空域起飞原点：无人在线时回到这个默认值；一旦有人加入，改由首个玩家的地图选点决定。
+// 全员共用同一原点才能共享本地 ENU 坐标系，所以后来者只能同步、不能覆盖。
+const DEFAULT_WORLD_ORIGIN = {
   lon: Number(process.env.MP_ORIGIN_LON) || 116.4602,
   lat: Number(process.env.MP_ORIGIN_LAT) || 39.9026,
   placeName: process.env.MP_ORIGIN_NAME || '北京国贸',
 }
+let worldOrigin = { ...DEFAULT_WORLD_ORIGIN }
 
 // 空域上限：Cesium 多 Model 渲染与带宽都在这个量级内可控（见方案第 10 节）。
 const MAX_PLAYERS = 16
@@ -138,7 +141,7 @@ const httpServer = http.createServer((req, res) => {
     req.url === '/healthz' || (req.url === '/' && !STATIC_DIR)
   if (health) {
     res.writeHead(200, { 'content-type': 'application/json' })
-    res.end(JSON.stringify({ ok: true, players: totalPlayers(), origin: WORLD_ORIGIN }))
+    res.end(JSON.stringify({ ok: true, players: totalPlayers(), origin: worldOrigin }))
     return
   }
   if (STATIC_DIR) {
@@ -177,6 +180,19 @@ function sanitizeName(raw) {
   return name || `飞手-${Math.floor(1000 + Math.random() * 9000)}`
 }
 
+/** 首个玩家带来的起飞点；非法坐标直接丢弃，回退到默认原点 */
+function sanitizeOrigin(raw) {
+  const lon = Number(raw?.lon)
+  const lat = Number(raw?.lat)
+  if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null
+  if (lon < -180 || lon > 180 || lat < -85 || lat > 85) return null
+  return {
+    lon,
+    lat,
+    placeName: String(raw?.placeName ?? '').replace(/\s+/g, ' ').trim().slice(0, 48) || '自定义起飞点',
+  }
+}
+
 function publicPlayer(p) {
   return { id: p.id, name: p.name, color: p.color, droneTypeId: p.droneTypeId, crashed: p.crashed, joinedAt: p.joinedAt }
 }
@@ -191,6 +207,8 @@ function removePlayer(id, reason) {
   players.delete(id)
   io.to('world').emit('mp:player-left', { id, reason })
   console.log(`[mp] ${player.name}(${id}) 离开空域（${reason}），剩余 ${players.size} 人`)
+  // 空场后释放自定义原点：下一个人可以带自己的选点进来
+  if (players.size === 0) worldOrigin = { ...DEFAULT_WORLD_ORIGIN }
 }
 
 io.on('connection', (socket) => {
@@ -223,6 +241,15 @@ io.on('connection', (socket) => {
       return
     }
 
+    // 首个玩家用自己地图上的选点定空域原点；后来者只继承，避免各自搬点后坐标错位
+    if (players.size === 0) {
+      const offered = sanitizeOrigin(payload?.origin)
+      if (offered) {
+        worldOrigin = offered
+        console.log(`[mp] 空域原点由 ${name} 设为 ${offered.placeName} ${offered.lat}, ${offered.lon}`)
+      }
+    }
+
     const player = {
       id: socket.id,
       name,
@@ -237,8 +264,8 @@ io.on('connection', (socket) => {
     joined = true
 
     // 加入确认：先发事件再回 ack，两包可能分批到达，客户端不能依赖顺序
-    socket.emit('mp:joined', { self: publicPlayer(player), origin: WORLD_ORIGIN, players: roster() })
-    if (typeof ack === 'function') ack({ ok: true, self: publicPlayer(player), origin: WORLD_ORIGIN, players: roster() })
+    socket.emit('mp:joined', { self: publicPlayer(player), origin: worldOrigin, players: roster() })
+    if (typeof ack === 'function') ack({ ok: true, self: publicPlayer(player), origin: worldOrigin, players: roster() })
     socket.to('world').emit('mp:player-joined', { player: publicPlayer(player) })
     console.log(`[mp] ${player.name}(${socket.id}) 进入空域，当前 ${players.size} 人`)
   })
@@ -300,6 +327,6 @@ httpServer.listen(PORT, HOST, () => {
   const staticNote = STATIC_DIR ? `，同源静态托管 ${STATIC_DIR}` : ''
   console.log(
     `[mp] 全球空域服务器已启动: http://${HOST}:${PORT}${staticNote}` +
-      `（起飞点 ${WORLD_ORIGIN.placeName} ${WORLD_ORIGIN.lat}, ${WORLD_ORIGIN.lon}；CORS 放行 ${ORIGINS.join(', ')}）`,
+      `（默认起飞点 ${worldOrigin.placeName} ${worldOrigin.lat}, ${worldOrigin.lon}；首个玩家可用自己的选点覆盖；CORS 放行 ${ORIGINS.join(', ')}）`,
   )
 })
